@@ -21,4 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "GrensilVideoList"
 include(":app")
- 
+include(":core:domain")
+include(":core:data")
+include(":core:network")
+include(":core:designsystem")
+
