@@ -53,7 +53,7 @@ fun PhotoItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .padding(8.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .size(32.dp)
                     .zIndex(1f)
                     .background(PurpleGrey40)
