@@ -18,8 +18,8 @@ fun VideoUserDto.toDomain(): VideoUser {
 fun VideoFileDto.toDomain(): VideoFile {
     return VideoFile(
         id = id,
-        quality = qualify,
-        fileType = file_type,
+        quality = quality,
+        fileType = fileType,
         width = width,
         height = height,
         link = link
