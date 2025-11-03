@@ -7,15 +7,13 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class VideoDto(
-    val id: Int,
+    val id: Long,
     val width: Int,
     val height: Int,
     val url: String,
     val image: String,
     val duration: Int,
     val user: VideoUserDto,
-    @SerializedName("video_files")
-    val videoFiles: List<VideoFileDto>,
-    @SerializedName("video_pictures")
-    val videoPictures: List<VideoPictureDto>? = null
+    val video_files: List<VideoFileDto>,
+    val video_pictures: List<VideoPictureDto>? = null
 ) : Parcelable

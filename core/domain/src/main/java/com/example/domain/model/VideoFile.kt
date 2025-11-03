@@ -1,7 +1,7 @@
 package com.example.domain.model
 
 data class VideoFile(
-    val id: Int,
+    val id: Long,
     val quality: String,
     val fileType: String,
     val width: Int,

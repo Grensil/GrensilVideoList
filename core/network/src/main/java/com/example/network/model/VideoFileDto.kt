@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class VideoFileDto(
-    val id: Int,
+    val id: Long,
     val quality: String,
     @SerializedName("file_type")
     val fileType: String,

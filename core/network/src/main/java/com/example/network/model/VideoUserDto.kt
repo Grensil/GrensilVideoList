@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class VideoUserDto(
-    val id: Int,
+    val id: Long,
     val name: String,
     val url: String
 ) : Parcelable

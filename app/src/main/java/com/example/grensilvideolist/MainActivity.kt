@@ -11,23 +11,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.domain.model.MediaItem
+import com.example.domain.model.Photo
 import com.example.domain.model.Video
 import com.example.grensilvideolist.ui.theme.GrensilVideoListTheme
-import com.example.grensilvideolist.viewmodel.VideoUiState
 import com.example.grensilvideolist.viewmodel.VideoViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,17 +38,17 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             GrensilVideoListTheme {
-                VideoListScreen()
+                MediaListScreen()
             }
         }
     }
 }
 
 @Composable
-fun VideoListScreen(
+fun MediaListScreen(
     viewModel: VideoViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val mediaPagingItems = viewModel.mediaPagingData.collectAsLazyPagingItems()
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Box(
@@ -56,57 +56,70 @@ fun VideoListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            when (val state = uiState) {
-                is VideoUiState.Initial -> {
-                    InitialContent(onLoadClick = { viewModel.loadPopularVideos() })
-                }
-                is VideoUiState.Loading -> {
-                    LoadingContent()
-                }
-                is VideoUiState.Success -> {
-                    VideoList(videos = state.videos)
-                }
-                is VideoUiState.Error -> {
-                    ErrorContent(
-                        message = state.message,
-                        onRetryClick = { viewModel.loadPopularVideos() }
-                    )
-                }
-            }
+            MediaList(mediaPagingItems = mediaPagingItems)
         }
     }
 }
 
 @Composable
-fun InitialContent(onLoadClick: () -> Unit) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Button(onClick = onLoadClick) {
-            Text("Load Popular Videos")
-        }
-    }
-}
-
-@Composable
-fun LoadingContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-fun VideoList(videos: List<Video>) {
+fun MediaList(mediaPagingItems: LazyPagingItems<MediaItem>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(videos) { video ->
-            VideoItem(video = video)
+        items(mediaPagingItems.itemCount) { index ->
+            mediaPagingItems[index]?.let { mediaItem ->
+                when (mediaItem) {
+                    is MediaItem.VideoItem -> VideoItem(video = mediaItem.video)
+                    is MediaItem.PhotoItem -> PhotoItem(photo = mediaItem.photo)
+                }
+            }
+        }
+
+        // Loading state
+        mediaPagingItems.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+                loadState.append is LoadState.Loading -> {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+                loadState.refresh is LoadState.Error -> {
+                    val error = (loadState.refresh as LoadState.Error).error
+                    item {
+                        ErrorContent(
+                            message = error.message ?: "Unknown error",
+                            onRetryClick = { retry() }
+                        )
+                    }
+                }
+                loadState.append is LoadState.Error -> {
+                    val error = (loadState.append as LoadState.Error).error
+                    item {
+                        ErrorContent(
+                            message = error.message ?: "Unknown error",
+                            onRetryClick = { retry() }
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -121,6 +134,11 @@ fun VideoItem(video: Video) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            Text(
+                text = "VIDEO",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
             Text(
                 text = "ID: ${video.id}",
                 style = MaterialTheme.typography.titleMedium
@@ -142,6 +160,41 @@ fun VideoItem(video: Video) {
 }
 
 @Composable
+fun PhotoItem(photo: Photo) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "PHOTO",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = "ID: ${photo.id}",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "Photographer: ${photo.photographer}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Size: ${photo.width}x${photo.height}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Alt: ${photo.alt}",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
 fun ErrorContent(message: String, onRetryClick: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -155,7 +208,7 @@ fun ErrorContent(message: String, onRetryClick: () -> Unit) {
                 text = "Error: $message",
                 color = MaterialTheme.colorScheme.error
             )
-            Button(onClick = onRetryClick) {
+            androidx.compose.material3.Button(onClick = onRetryClick) {
                 Text("Retry")
             }
         }

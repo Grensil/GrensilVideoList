@@ -42,5 +42,8 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
 
+    // Paging
+    implementation(libs.paging.runtime)
+
     testImplementation(libs.junit)
 }

@@ -10,6 +10,7 @@ interface VideoApi {
     @GET("videos/popular")
     suspend fun getPopularVideos(
         @Header("Authorization") apiKey: String,
+        @Query("page") page: Int,
         @Query("per_page") perPage: Int,
     ): PopularVideoListResponse
 }

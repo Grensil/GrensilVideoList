@@ -1,8 +1,12 @@
 package com.example.data.model
 
+import com.example.domain.model.Photo
+import com.example.domain.model.PhotoSrc
 import com.example.domain.model.Video
 import com.example.domain.model.VideoFile
 import com.example.domain.model.VideoUser
+import com.example.network.model.PhotoDto
+import com.example.network.model.PhotoSrcDto
 import com.example.network.model.VideoDto
 import com.example.network.model.VideoFileDto
 import com.example.network.model.VideoUserDto
@@ -35,6 +39,33 @@ fun VideoDto.toDomain(): Video {
         image = image,
         duration = duration,
         user = user.toDomain(),
-        videoFiles = videoFiles.map { it.toDomain() }
+        videoFiles = video_files.map { it.toDomain() }
+    )
+}
+
+fun PhotoSrcDto.toDomain(): PhotoSrc {
+    return PhotoSrc(
+        original = original,
+        large2x = large2x,
+        large = large,
+        medium = medium,
+        small = small,
+        portrait = portrait,
+        landscape = landscape,
+        tiny = tiny
+    )
+}
+
+fun PhotoDto.toDomain(): Photo {
+    return Photo(
+        id = id,
+        width = width,
+        height = height,
+        url = url,
+        photographer = photographer,
+        photographerUrl = photographerUrl,
+        avgColor = avgColor,
+        src = src.toDomain(),
+        alt = alt
     )
 }

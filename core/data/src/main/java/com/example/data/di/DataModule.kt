@@ -4,6 +4,7 @@ import com.example.data.datasource.remote.MediaRemoteDataSource
 import com.example.data.repository.ApiKey
 import com.example.data.repository.VideoRepositoryImpl
 import com.example.domain.repository.VideoRepository
+import com.example.network.api.ImageApi
 import com.example.network.api.VideoApi
 import dagger.Module
 import dagger.Provides
@@ -18,9 +19,10 @@ object DataModule {
     @Provides
     @Singleton
     fun provideMediaRemoteDataSource(
-        videoApi: VideoApi
+        videoApi: VideoApi,
+        imageApi: ImageApi
     ): MediaRemoteDataSource {
-        return MediaRemoteDataSource(videoApi)
+        return MediaRemoteDataSource(videoApi, imageApi)
     }
 
     @Provides
