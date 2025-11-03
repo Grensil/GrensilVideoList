@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
     implementation(project(":core:domain"))
 
     implementation(libs.androidx.core.ktx)
@@ -55,4 +56,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.navigation.runtime.ktx)
     ksp(libs.hilt.compiler)
+
+    // Coil for Compose
+    implementation(libs.coil.compose)
 }

@@ -8,5 +8,6 @@ data class Video(
     val image: String,
     val duration: Int,
     val user: VideoUser,
-    val videoFiles: List<VideoFile>
+    val videoFiles: List<VideoFile>,
+    val videoPictures: List<VideoPicture>? = null
 )

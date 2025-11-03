@@ -4,11 +4,13 @@ import com.example.domain.model.Photo
 import com.example.domain.model.PhotoSrc
 import com.example.domain.model.Video
 import com.example.domain.model.VideoFile
+import com.example.domain.model.VideoPicture
 import com.example.domain.model.VideoUser
 import com.example.network.model.PhotoDto
 import com.example.network.model.PhotoSrcDto
 import com.example.network.model.VideoDto
 import com.example.network.model.VideoFileDto
+import com.example.network.model.VideoPictureDto
 import com.example.network.model.VideoUserDto
 
 fun VideoUserDto.toDomain(): VideoUser {
@@ -30,6 +32,14 @@ fun VideoFileDto.toDomain(): VideoFile {
     )
 }
 
+fun VideoPictureDto.toDomain(): VideoPicture {
+    return VideoPicture(
+        id = id,
+        picture = picture,
+        nr = nr
+    )
+}
+
 fun VideoDto.toDomain(): Video {
     return Video(
         id = id,
@@ -39,7 +49,8 @@ fun VideoDto.toDomain(): Video {
         image = image,
         duration = duration,
         user = user.toDomain(),
-        videoFiles = video_files.map { it.toDomain() }
+        videoFiles = video_files.map { it.toDomain() },
+        videoPictures = video_pictures?.map { it.toDomain() }
     )
 }
 
