@@ -3,6 +3,7 @@ package com.example.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.example.data.datasource.local.MediaLocalDataSource
 import com.example.data.datasource.remote.MediaRemoteDataSource
 import com.example.data.paging.MediaPagingSource
 import com.example.domain.model.MediaItem
@@ -12,6 +13,7 @@ import javax.inject.Inject
 
 class MediaRepositoryImpl @Inject constructor(
     private val remoteDataSource: MediaRemoteDataSource,
+    private val localDataSource: MediaLocalDataSource,
     @ApiKey private val apiKey: String
 ) : MediaRepository {
 
@@ -25,6 +27,7 @@ class MediaRepositoryImpl @Inject constructor(
             pagingSourceFactory = {
                 MediaPagingSource(
                     remoteDataSource = remoteDataSource,
+                    localDataSource = localDataSource,
                     apiKey = apiKey
                 )
             }

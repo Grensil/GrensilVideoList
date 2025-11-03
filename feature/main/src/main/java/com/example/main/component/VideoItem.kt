@@ -11,12 +11,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +40,11 @@ import com.example.main.R
 
 
 @Composable
-fun VideoItem(video: Video) {
+fun VideoItem(
+    video: Video,
+    isBookmarked: Boolean = false,
+    onBookmarkClick: (Video) -> Unit = {}
+) {
 
     Card(
         modifier = Modifier
@@ -57,6 +67,22 @@ fun VideoItem(video: Video) {
                     .align(Alignment.TopStart),
                 alignment = Alignment.TopStart
             )
+
+            // Bookmark icon button (Top Right)
+            IconButton(
+                onClick = { onBookmarkClick(video) },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .zIndex(2f)
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+                    contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
 
             AsyncImage(
                 modifier = Modifier

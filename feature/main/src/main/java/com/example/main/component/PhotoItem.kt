@@ -10,12 +10,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -27,7 +33,11 @@ import com.example.domain.model.Photo
 import com.example.main.R
 
 @Composable
-fun PhotoItem(photo: Photo) {
+fun PhotoItem(
+    photo: Photo,
+    isBookmarked: Boolean = false,
+    onBookmarkClick: (Photo) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -50,6 +60,22 @@ fun PhotoItem(photo: Photo) {
                     .align(Alignment.TopStart),
                 alignment = Alignment.TopStart
             )
+
+            // Bookmark icon button (Top Right)
+            IconButton(
+                onClick = { onBookmarkClick(photo) },
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp)
+                    .zIndex(2f)
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+                    contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
 
             AsyncImage(
                 modifier = Modifier

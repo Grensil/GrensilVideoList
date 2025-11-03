@@ -2,12 +2,14 @@ package com.example.data.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.example.data.datasource.local.MediaLocalDataSource
 import com.example.data.datasource.remote.MediaRemoteDataSource
 import com.example.data.model.toDomain
 import com.example.domain.model.MediaItem
 
 class MediaPagingSource(
     private val remoteDataSource: MediaRemoteDataSource,
+    private val localDataSource: MediaLocalDataSource,
     private val apiKey: String
 ) : PagingSource<Int, MediaItem>() {
 
@@ -24,13 +26,21 @@ class MediaPagingSource(
                 apiKey = apiKey,
                 page = page,
                 perPage = videoPerPage
-            ).videos.map { MediaItem.VideoItem(it.toDomain()) }
+            ).videos.map {
+                val video = it.toDomain()
+                val isBookmarked = localDataSource.getVideoByIdOnce(video.id) != null
+                MediaItem.VideoItem(video, isBookmarked)
+            }
 
             val photos = remoteDataSource.getCuratedPhotos(
                 apiKey = apiKey,
                 page = page,
                 perPage = photoPerPage
-            ).photos.map { MediaItem.PhotoItem(it.toDomain()) }
+            ).photos.map {
+                val photo = it.toDomain()
+                val isBookmarked = localDataSource.getPhotoByIdOnce(photo.id) != null
+                MediaItem.PhotoItem(photo, isBookmarked)
+            }
 
             // 비디오와 이미지를 번갈아가면서 섞기
             val combined = mutableListOf<MediaItem>()

@@ -93,8 +93,9 @@ object DataModule {
     @Singleton
     fun provideMediaRepository(
         remoteDataSource: MediaRemoteDataSource,
+        localDataSource: MediaLocalDataSource,
         @ApiKey apiKey: String
     ): MediaRepository {
-        return MediaRepositoryImpl(remoteDataSource, apiKey)
+        return MediaRepositoryImpl(remoteDataSource, localDataSource, apiKey)
     }
 }

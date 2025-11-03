@@ -23,7 +23,10 @@ fun HomeScreen(navController: NavHostController,
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            MediaList(mediaPagingItems = mediaPagingItems)
+            MediaList(
+                mediaPagingItems = mediaPagingItems,
+                viewModel = viewModel
+            )
         }
     }
 }
