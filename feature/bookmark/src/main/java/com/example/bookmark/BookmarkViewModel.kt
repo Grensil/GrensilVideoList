@@ -1,10 +1,6 @@
-package com.example.main
+package com.example.bookmark
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import com.example.domain.model.MediaItem
 import com.example.domain.usecase.media.GetMediaPagingDataUseCase
 import com.example.domain.usecase.photo.DeletePhotoUseCase
 import com.example.domain.usecase.photo.SavePhotoUseCase
@@ -12,19 +8,17 @@ import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.GetSavedVideosUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(
-    private val getMediaPagingDataUseCase: GetMediaPagingDataUseCase,
+class BookmarkViewModel @Inject constructor(
+    private val getSavedPhotoUseCase: GetMediaPagingDataUseCase,
+    private val getSavedVideoUseCase: GetSavedVideosUseCase,
     private val savePhotoUseCase: SavePhotoUseCase,
     private val saveVideoUseCase: SaveVideoUseCase,
     private val deletePhotoUseCase: DeletePhotoUseCase,
     private val deleteVideoUseCase: DeleteVideoUseCase
 ) : ViewModel() {
 
-    val mediaPagingData: Flow<PagingData<MediaItem>> =
-        getMediaPagingDataUseCase()
-            .cachedIn(viewModelScope)
+
 }

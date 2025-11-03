@@ -1,5 +1,7 @@
 package com.example.data.model
 
+import com.example.data.datasource.local.db.entity.PhotoEntity
+import com.example.data.datasource.local.db.entity.VideoEntity
 import com.example.domain.model.Photo
 import com.example.domain.model.PhotoSrc
 import com.example.domain.model.Video
@@ -77,6 +79,64 @@ fun PhotoDto.toDomain(): Photo {
         photographerUrl = photographerUrl,
         avgColor = avgColor,
         src = src.toDomain(),
+        alt = alt
+    )
+}
+
+// Entity to Domain mappers
+fun VideoEntity.toDomain(): Video {
+    return Video(
+        id = id,
+        width = width,
+        height = height,
+        url = url,
+        image = image,
+        duration = duration,
+        user = user,
+        videoFiles = videoFiles,
+        videoPictures = videoPictures
+    )
+}
+
+fun PhotoEntity.toDomain(): Photo {
+    return Photo(
+        id = id,
+        width = width,
+        height = height,
+        url = url,
+        photographer = photographer,
+        photographerUrl = photographerUrl,
+        avgColor = avgColor,
+        src = src,
+        alt = alt
+    )
+}
+
+// Domain to Entity mappers
+fun Video.toEntity(): VideoEntity {
+    return VideoEntity(
+        id = id,
+        width = width,
+        height = height,
+        url = url,
+        image = image,
+        duration = duration,
+        user = user,
+        videoFiles = videoFiles,
+        videoPictures = videoPictures
+    )
+}
+
+fun Photo.toEntity(): PhotoEntity {
+    return PhotoEntity(
+        id = id,
+        width = width,
+        height = height,
+        url = url,
+        photographer = photographer,
+        photographerUrl = photographerUrl,
+        avgColor = avgColor,
+        src = src,
         alt = alt
     )
 }

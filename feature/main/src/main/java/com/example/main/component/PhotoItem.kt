@@ -26,7 +26,6 @@ import com.example.designsystem.theme.PurpleGrey80
 import com.example.domain.model.Photo
 import com.example.main.R
 
-
 @Composable
 fun PhotoItem(photo: Photo) {
     Card(
