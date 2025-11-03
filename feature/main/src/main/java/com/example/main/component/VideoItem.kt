@@ -61,7 +61,7 @@ fun VideoItem(
                 modifier = Modifier
                     .padding(8.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .size(48.dp)
+                    .size(32.dp)
                     .zIndex(1f)
                     .background(PurpleGrey40)
                     .align(Alignment.TopStart),
