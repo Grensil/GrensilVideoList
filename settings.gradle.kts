@@ -26,3 +26,5 @@ include(":core:data")
 include(":core:network")
 include(":core:designsystem")
 
+include(":feature:main")
+include(":feature:bookmark")

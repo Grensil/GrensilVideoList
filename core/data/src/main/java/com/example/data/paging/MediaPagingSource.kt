@@ -41,7 +41,7 @@ class MediaPagingSource(
             }
 
             LoadResult.Page(
-                data = combined,
+                data = combined.shuffled(),
                 prevKey = if (page == 1) null else page - 1,
                 nextKey = if (combined.isEmpty()) null else page + 1
             )

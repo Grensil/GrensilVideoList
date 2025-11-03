@@ -1,7 +1,5 @@
-import java.util.Properties
-
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
@@ -9,26 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.example.grensilvideolist"
+    namespace = "com.example.main"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.grensilvideolist"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        // Load API keys from local.properties
-        val properties = Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            properties.load(localPropertiesFile.inputStream())
-        }
-
-        buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY", "")}\"")
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -49,20 +35,12 @@ android {
     }
     buildFeatures {
         compose = true
-        buildConfig = true
     }
 }
 
 dependencies {
 
-    // Core modules
     implementation(project(":core:domain"))
-    implementation(project(":core:data"))
-    implementation(project(":core:network"))
-    implementation(project(":core:designsystem"))
-
-    implementation(project(":feature:main"))
-    implementation(project(":feature:bookmark"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -72,21 +50,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.paging.compose)
+    implementation(libs.androidx.navigation.runtime.ktx)
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
 
-    // Paging
-    implementation(libs.paging.runtime)
-    implementation(libs.paging.compose)
-
+    // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+
 }

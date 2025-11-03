@@ -1,4 +1,4 @@
-package com.example.grensilvideolist.viewmodel
+package com.example.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 @HiltViewModel
-class VideoViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val getMediaPagingDataUseCase: GetMediaPagingDataUseCase
 ) : ViewModel() {
 
