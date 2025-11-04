@@ -66,12 +66,8 @@ class BookmarkViewModel @Inject constructor(
     fun toggleVideoBookmark(video: Video) {
         viewModelScope.launch {
             val currentState = _videoBookmarkStates.value[video.id]
-            val isSaved = if (currentState != null) {
-                currentState
-            } else {
-                // 리스트에 있으면 저장되어 있음
-                _uiVideos.value.any { it.id == video.id }
-            }
+            val isSaved = currentState ?: // 리스트에 있으면 저장되어 있음
+            _uiVideos.value.any { it.id == video.id }
 
             if (isSaved) {
                 // 북마크 제거
@@ -88,12 +84,8 @@ class BookmarkViewModel @Inject constructor(
     fun togglePhotoBookmark(photo: Photo) {
         viewModelScope.launch {
             val currentState = _photoBookmarkStates.value[photo.id]
-            val isSaved = if (currentState != null) {
-                currentState
-            } else {
-                // 리스트에 있으면 저장되어 있음
-                _uiPhotos.value.any { it.id == photo.id }
-            }
+            val isSaved = currentState ?: // 리스트에 있으면 저장되어 있음
+            _uiPhotos.value.any { it.id == photo.id }
 
             if (isSaved) {
                 // 북마크 제거

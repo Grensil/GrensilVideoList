@@ -9,17 +9,18 @@ import com.example.domain.model.Photo
 import com.example.domain.model.Video
 import com.example.domain.usecase.media.GetMediaPagingDataUseCase
 import com.example.domain.usecase.photo.DeletePhotoUseCase
-import com.example.domain.usecase.photo.GetSavedPhotosUseCase
+import com.example.domain.usecase.photo.GetBookmarkedPhotosStateUseCase
 import com.example.domain.usecase.photo.IsPhotoSavedUseCase
 import com.example.domain.usecase.photo.SavePhotoUseCase
 import com.example.domain.usecase.video.DeleteVideoUseCase
-import com.example.domain.usecase.video.GetSavedVideosUseCase
+import com.example.domain.usecase.video.GetBookmarkedVideosStateUseCase
 import com.example.domain.usecase.video.IsVideoSavedUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,82 +33,35 @@ class HomeViewModel @Inject constructor(
     private val deleteVideoUseCase: DeleteVideoUseCase,
     private val isVideoSavedUseCase: IsVideoSavedUseCase,
     private val isPhotoSavedUseCase: IsPhotoSavedUseCase,
-    private val getSavedVideosUseCase: GetSavedVideosUseCase,
-    private val getSavedPhotosUseCase: GetSavedPhotosUseCase
+    private val getBookmarkedVideosStateUseCase: GetBookmarkedVideosStateUseCase,
+    private val getBookmarkedPhotosStateUseCase: GetBookmarkedPhotosStateUseCase
 ) : ViewModel() {
 
     val mediaPagingData: Flow<PagingData<MediaItem>> =
-        getMediaPagingDataUseCase()
-            .cachedIn(viewModelScope)
+        getMediaPagingDataUseCase().cachedIn(viewModelScope)
 
-    // Track bookmark state changes (null = no change from MediaItem.isBookmarked)
-    private val _bookmarkedVideos = MutableStateFlow<Map<Long, Boolean?>>(emptyMap())
-    val bookmarkedVideos: StateFlow<Map<Long, Boolean?>> = _bookmarkedVideos
+    // DB Flow를 hot stream으로 변환하여 북마크 상태 추적
+    val bookmarkedVideos: StateFlow<Map<Long, Boolean>> = getBookmarkedVideosStateUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
-    private val _bookmarkedPhotos = MutableStateFlow<Map<Long, Boolean?>>(emptyMap())
-    val bookmarkedPhotos: StateFlow<Map<Long, Boolean?>> = _bookmarkedPhotos
-
-    init {
-        // DB에서 저장된 비디오/사진 ID를 구독하여 북마크 상태 추적
-        viewModelScope.launch {
-            getSavedVideosUseCase().collect { savedVideos ->
-                val savedIds = savedVideos.map { it.id }.toSet()
-                // 현재 Map의 모든 ID를 확인하고 업데이트
-                val currentMap = _bookmarkedVideos.value
-                val updatedMap = currentMap.toMutableMap()
-
-                // 1. 현재 추적 중인 ID들 중 DB에서 제거된 항목은 false로 설정
-                currentMap.keys.forEach { id ->
-                    if (id !in savedIds) {
-                        updatedMap[id] = false
-                    }
-                }
-
-                // 2. DB에 있는 항목들 중 Map에 없거나 false인 항목은 true로 설정
-                savedIds.forEach { id ->
-                    if (currentMap[id] != true) {
-                        updatedMap[id] = true
-                    }
-                }
-
-                _bookmarkedVideos.value = updatedMap
-            }
-        }
-
-        viewModelScope.launch {
-            getSavedPhotosUseCase().collect { savedPhotos ->
-                val savedIds = savedPhotos.map { it.id }.toSet()
-                val currentMap = _bookmarkedPhotos.value
-                val updatedMap = currentMap.toMutableMap()
-
-                // 1. 현재 추적 중인 ID들 중 DB에서 제거된 항목은 false로 설정
-                currentMap.keys.forEach { id ->
-                    if (id !in savedIds) {
-                        updatedMap[id] = false
-                    }
-                }
-
-                // 2. DB에 있는 항목들 중 Map에 없거나 false인 항목은 true로 설정
-                savedIds.forEach { id ->
-                    if (currentMap[id] != true) {
-                        updatedMap[id] = true
-                    }
-                }
-
-                _bookmarkedPhotos.value = updatedMap
-            }
-        }
-    }
+    val bookmarkedPhotos: StateFlow<Map<Long, Boolean>> = getBookmarkedPhotosStateUseCase()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
     fun toggleVideoBookmark(video: Video) {
         viewModelScope.launch {
             val isSaved = isVideoSavedUseCase(video.id)
             if (isSaved) {
                 deleteVideoUseCase(video)
-                _bookmarkedVideos.value = _bookmarkedVideos.value + (video.id to false)
             } else {
                 saveVideoUseCase(video)
-                _bookmarkedVideos.value = _bookmarkedVideos.value + (video.id to true)
             }
         }
     }
@@ -117,10 +71,8 @@ class HomeViewModel @Inject constructor(
             val isSaved = isPhotoSavedUseCase(photo.id)
             if (isSaved) {
                 deletePhotoUseCase(photo)
-                _bookmarkedPhotos.value = _bookmarkedPhotos.value + (photo.id to false)
             } else {
                 savePhotoUseCase(photo)
-                _bookmarkedPhotos.value = _bookmarkedPhotos.value + (photo.id to true)
             }
         }
     }
