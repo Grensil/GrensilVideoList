@@ -13,3 +13,18 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Sensitive files
+*.jks
+*.keystore
+*.properties
+!gradle-wrapper.properties
+!gradle.properties
+
+# API Keys and secrets
+secrets.properties
+api_keys.properties
+
+# Generated files
+app/release/
+app/debug/
