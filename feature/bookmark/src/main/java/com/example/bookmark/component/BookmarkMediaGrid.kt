@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -40,11 +42,6 @@ import com.example.designsystem.theme.PurpleGrey80
 import com.example.domain.model.Photo
 import com.example.domain.model.Video
 
-sealed class BookmarkMediaItem {
-    data class VideoItem(val video: Video, val isBookmarked: Boolean) : BookmarkMediaItem()
-    data class PhotoItem(val photo: Photo, val isBookmarked: Boolean) : BookmarkMediaItem()
-}
-
 @Composable
 fun BookmarkMediaGrid(
     videos: List<Video>,
@@ -53,40 +50,41 @@ fun BookmarkMediaGrid(
     photoBookmarkStates: Map<Long, Boolean>,
     onVideoBookmarkRemove: (Video) -> Unit,
     onPhotoBookmarkRemove: (Photo) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lazyGridState: LazyGridState = rememberLazyGridState()
 ) {
-    // Combine videos and photos into a single list
-    val mediaItems = buildList {
-        addAll(videos.map { video ->
-            val isBookmarked = videoBookmarkStates[video.id] ?: true // 기본값은 true (리스트에 있으면 북마크됨)
-            BookmarkMediaItem.VideoItem(video, isBookmarked)
-        })
-        addAll(photos.map { photo ->
-            val isBookmarked = photoBookmarkStates[photo.id] ?: true // 기본값은 true (리스트에 있으면 북마크됨)
-            BookmarkMediaItem.PhotoItem(photo, isBookmarked)
-        })
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
+        state = lazyGridState,
         modifier = modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(8.dp)
     ) {
-        items(mediaItems) { item ->
-            when (item) {
-                is BookmarkMediaItem.VideoItem -> BookmarkVideoGridItem(
-                    video = item.video,
-                    isBookmarked = item.isBookmarked,
-                    onBookmarkRemove = { onVideoBookmarkRemove(item.video) }
-                )
-                is BookmarkMediaItem.PhotoItem -> BookmarkPhotoGridItem(
-                    photo = item.photo,
-                    isBookmarked = item.isBookmarked,
-                    onBookmarkRemove = { onPhotoBookmarkRemove(item.photo) }
-                )
-            }
+        // Videos
+        items(
+            items = videos,
+            key = { video -> "video_${video.id}" }
+        ) { video ->
+            val isBookmarked = videoBookmarkStates[video.id] ?: true
+            BookmarkVideoGridItem(
+                video = video,
+                isBookmarked = isBookmarked,
+                onBookmarkRemove = { onVideoBookmarkRemove(video) }
+            )
+        }
+
+        // Photos
+        items(
+            items = photos,
+            key = { photo -> "photo_${photo.id}" }
+        ) { photo ->
+            val isBookmarked = photoBookmarkStates[photo.id] ?: true
+            BookmarkPhotoGridItem(
+                photo = photo,
+                isBookmarked = isBookmarked,
+                onBookmarkRemove = { onPhotoBookmarkRemove(photo) }
+            )
         }
     }
 }

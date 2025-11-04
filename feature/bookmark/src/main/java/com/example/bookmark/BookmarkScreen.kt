@@ -3,6 +3,7 @@ package com.example.bookmark
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -13,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -35,8 +37,13 @@ fun BookmarkScreen(
         onDispose { }
     }
 
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val tabs = listOf("전체", "비디오", "사진")
+
+    // 각 탭의 스크롤 위치를 독립적으로 저장
+    val allTabState = rememberLazyGridState()
+    val videoTabState = rememberLazyGridState()
+    val photoTabState = rememberLazyGridState()
 
     Scaffold(
         topBar = {
@@ -63,7 +70,8 @@ fun BookmarkScreen(
                     videoBookmarkStates = videoBookmarkStates,
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { viewModel.removeVideoBookmark(it) },
-                    onPhotoBookmarkRemove = { viewModel.removePhotoBookmark(it) }
+                    onPhotoBookmarkRemove = { viewModel.removePhotoBookmark(it) },
+                    lazyGridState = allTabState
                 )
                 1 -> BookmarkMediaGrid(
                     videos = uiVideos,
@@ -71,7 +79,8 @@ fun BookmarkScreen(
                     videoBookmarkStates = videoBookmarkStates,
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { video -> viewModel.removeVideoBookmark(video) },
-                    onPhotoBookmarkRemove = { }
+                    onPhotoBookmarkRemove = { },
+                    lazyGridState = videoTabState
                 )
                 2 -> BookmarkMediaGrid(
                     videos = emptyList(),
@@ -79,7 +88,8 @@ fun BookmarkScreen(
                     videoBookmarkStates = videoBookmarkStates,
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { },
-                    onPhotoBookmarkRemove = { photo -> viewModel.removePhotoBookmark(photo) }
+                    onPhotoBookmarkRemove = { photo -> viewModel.removePhotoBookmark(photo) },
+                    lazyGridState = photoTabState
                 )
             }
         }
