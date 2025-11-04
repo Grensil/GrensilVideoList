@@ -6,12 +6,15 @@ import com.example.domain.model.Photo
 import com.example.domain.model.Video
 import com.example.domain.usecase.photo.DeletePhotoUseCase
 import com.example.domain.usecase.photo.GetSavedPhotosUseCase
+import com.example.domain.usecase.photo.SavePhotoUseCase
 import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.GetSavedVideosUseCase
+import com.example.domain.usecase.video.SaveVideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,35 +23,91 @@ class BookmarkViewModel @Inject constructor(
     private val getSavedPhotosUseCase: GetSavedPhotosUseCase,
     private val getSavedVideosUseCase: GetSavedVideosUseCase,
     private val deletePhotoUseCase: DeletePhotoUseCase,
-    private val deleteVideoUseCase: DeleteVideoUseCase
+    private val deleteVideoUseCase: DeleteVideoUseCase,
+    private val savePhotoUseCase: SavePhotoUseCase,
+    private val saveVideoUseCase: SaveVideoUseCase
 ) : ViewModel() {
 
-    val savedVideos: Flow<List<Video>> = getSavedVideosUseCase()
-    val savedPhotos: Flow<List<Photo>> = getSavedPhotosUseCase()
+    // UI 상태 - 세션 중에는 삭제해도 유지됨
+    private val _uiVideos = MutableStateFlow<List<Video>>(emptyList())
+    val uiVideos: StateFlow<List<Video>> = _uiVideos.asStateFlow()
 
-    // Track removed items that should still be visible until tab change
-    private val _removedVideoIds = MutableStateFlow<Set<Long>>(emptySet())
-    val removedVideoIds: StateFlow<Set<Long>> = _removedVideoIds
+    private val _uiPhotos = MutableStateFlow<List<Photo>>(emptyList())
+    val uiPhotos: StateFlow<List<Photo>> = _uiPhotos.asStateFlow()
 
-    private val _removedPhotoIds = MutableStateFlow<Set<Long>>(emptySet())
-    val removedPhotoIds: StateFlow<Set<Long>> = _removedPhotoIds
+    // 북마크 상태 추적 (북마크 아이콘 표시용)
+    private val _videoBookmarkStates = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+    val videoBookmarkStates: StateFlow<Map<Long, Boolean>> = _videoBookmarkStates.asStateFlow()
 
-    fun removeVideoBookmark(video: Video) {
+    private val _photoBookmarkStates = MutableStateFlow<Map<Long, Boolean>>(emptyMap())
+    val photoBookmarkStates: StateFlow<Map<Long, Boolean>> = _photoBookmarkStates.asStateFlow()
+
+    init {
+        loadBookmarks()
+    }
+
+    fun loadBookmarks() {
+        // DB에서 최신 데이터를 한 번만 로드 (Flow 구독하지 않음)
+        // 화면 재진입 시 실제 북마크만 표시
         viewModelScope.launch {
-            deleteVideoUseCase(video)
-            _removedVideoIds.value = _removedVideoIds.value + video.id
+            val videos = getSavedVideosUseCase().first()
+            _uiVideos.value = videos
+            // 북마크 상태 초기화
+            _videoBookmarkStates.value = emptyMap()
+        }
+        viewModelScope.launch {
+            val photos = getSavedPhotosUseCase().first()
+            _uiPhotos.value = photos
+            // 북마크 상태 초기화
+            _photoBookmarkStates.value = emptyMap()
         }
     }
 
-    fun removePhotoBookmark(photo: Photo) {
+    fun toggleVideoBookmark(video: Video) {
         viewModelScope.launch {
-            deletePhotoUseCase(photo)
-            _removedPhotoIds.value = _removedPhotoIds.value + photo.id
+            val currentState = _videoBookmarkStates.value[video.id]
+            val isSaved = if (currentState != null) {
+                currentState
+            } else {
+                // 리스트에 있으면 저장되어 있음
+                _uiVideos.value.any { it.id == video.id }
+            }
+
+            if (isSaved) {
+                // 북마크 제거
+                deleteVideoUseCase(video)
+                _videoBookmarkStates.value = _videoBookmarkStates.value + (video.id to false)
+            } else {
+                // 북마크 추가
+                saveVideoUseCase(video)
+                _videoBookmarkStates.value = _videoBookmarkStates.value + (video.id to true)
+            }
         }
     }
 
-    fun clearRemovedItems() {
-        _removedVideoIds.value = emptySet()
-        _removedPhotoIds.value = emptySet()
+    fun togglePhotoBookmark(photo: Photo) {
+        viewModelScope.launch {
+            val currentState = _photoBookmarkStates.value[photo.id]
+            val isSaved = if (currentState != null) {
+                currentState
+            } else {
+                // 리스트에 있으면 저장되어 있음
+                _uiPhotos.value.any { it.id == photo.id }
+            }
+
+            if (isSaved) {
+                // 북마크 제거
+                deletePhotoUseCase(photo)
+                _photoBookmarkStates.value = _photoBookmarkStates.value + (photo.id to false)
+            } else {
+                // 북마크 추가
+                savePhotoUseCase(photo)
+                _photoBookmarkStates.value = _photoBookmarkStates.value + (photo.id to true)
+            }
+        }
     }
+
+    // 하위 호환성을 위해 유지
+    fun removeVideoBookmark(video: Video) = toggleVideoBookmark(video)
+    fun removePhotoBookmark(photo: Photo) = togglePhotoBookmark(photo)
 }

@@ -8,6 +8,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -23,8 +24,16 @@ fun BookmarkScreen(
     navController: NavHostController,
     viewModel: BookmarkViewModel = hiltViewModel()
 ) {
-    val savedVideos by viewModel.savedVideos.collectAsState(initial = emptyList())
-    val savedPhotos by viewModel.savedPhotos.collectAsState(initial = emptyList())
+    val uiVideos by viewModel.uiVideos.collectAsState()
+    val uiPhotos by viewModel.uiPhotos.collectAsState()
+    val videoBookmarkStates by viewModel.videoBookmarkStates.collectAsState()
+    val photoBookmarkStates by viewModel.photoBookmarkStates.collectAsState()
+
+    // 화면 재진입 시 실제 북마크된 항목만 로드
+    DisposableEffect(Unit) {
+        viewModel.loadBookmarks()
+        onDispose { }
+    }
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("전체", "비디오", "사진")
@@ -49,20 +58,26 @@ fun BookmarkScreen(
         ) {
             when (selectedTabIndex) {
                 0 -> BookmarkMediaGrid(
-                    videos = savedVideos,
-                    photos = savedPhotos,
+                    videos = uiVideos,
+                    photos = uiPhotos,
+                    videoBookmarkStates = videoBookmarkStates,
+                    photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { viewModel.removeVideoBookmark(it) },
                     onPhotoBookmarkRemove = { viewModel.removePhotoBookmark(it) }
                 )
                 1 -> BookmarkMediaGrid(
-                    videos = savedVideos,
+                    videos = uiVideos,
                     photos = emptyList(),
+                    videoBookmarkStates = videoBookmarkStates,
+                    photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { video -> viewModel.removeVideoBookmark(video) },
                     onPhotoBookmarkRemove = { }
                 )
                 2 -> BookmarkMediaGrid(
                     videos = emptyList(),
-                    photos = savedPhotos,
+                    photos = uiPhotos,
+                    videoBookmarkStates = videoBookmarkStates,
+                    photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { },
                     onPhotoBookmarkRemove = { photo -> viewModel.removePhotoBookmark(photo) }
                 )

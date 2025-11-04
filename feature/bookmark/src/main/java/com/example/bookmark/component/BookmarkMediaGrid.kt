@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,22 +41,30 @@ import com.example.domain.model.Photo
 import com.example.domain.model.Video
 
 sealed class BookmarkMediaItem {
-    data class VideoItem(val video: Video) : BookmarkMediaItem()
-    data class PhotoItem(val photo: Photo) : BookmarkMediaItem()
+    data class VideoItem(val video: Video, val isBookmarked: Boolean) : BookmarkMediaItem()
+    data class PhotoItem(val photo: Photo, val isBookmarked: Boolean) : BookmarkMediaItem()
 }
 
 @Composable
 fun BookmarkMediaGrid(
     videos: List<Video>,
     photos: List<Photo>,
+    videoBookmarkStates: Map<Long, Boolean>,
+    photoBookmarkStates: Map<Long, Boolean>,
     onVideoBookmarkRemove: (Video) -> Unit,
     onPhotoBookmarkRemove: (Photo) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Combine videos and photos into a single list
     val mediaItems = buildList {
-        addAll(videos.map { BookmarkMediaItem.VideoItem(it) })
-        addAll(photos.map { BookmarkMediaItem.PhotoItem(it) })
+        addAll(videos.map { video ->
+            val isBookmarked = videoBookmarkStates[video.id] ?: true // 기본값은 true (리스트에 있으면 북마크됨)
+            BookmarkMediaItem.VideoItem(video, isBookmarked)
+        })
+        addAll(photos.map { photo ->
+            val isBookmarked = photoBookmarkStates[photo.id] ?: true // 기본값은 true (리스트에 있으면 북마크됨)
+            BookmarkMediaItem.PhotoItem(photo, isBookmarked)
+        })
     }
 
     LazyVerticalGrid(
@@ -69,10 +78,12 @@ fun BookmarkMediaGrid(
             when (item) {
                 is BookmarkMediaItem.VideoItem -> BookmarkVideoGridItem(
                     video = item.video,
+                    isBookmarked = item.isBookmarked,
                     onBookmarkRemove = { onVideoBookmarkRemove(item.video) }
                 )
                 is BookmarkMediaItem.PhotoItem -> BookmarkPhotoGridItem(
                     photo = item.photo,
+                    isBookmarked = item.isBookmarked,
                     onBookmarkRemove = { onPhotoBookmarkRemove(item.photo) }
                 )
             }
@@ -83,6 +94,7 @@ fun BookmarkMediaGrid(
 @Composable
 fun BookmarkVideoGridItem(
     video: Video,
+    isBookmarked: Boolean,
     onBookmarkRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,9 +139,9 @@ fun BookmarkVideoGridItem(
                     .zIndex(2f)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Star,
+                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = "Remove bookmark",
-                    tint = Color(0xFFFFD700),
+                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.Gray,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -162,6 +174,7 @@ fun BookmarkVideoGridItem(
 @Composable
 fun BookmarkPhotoGridItem(
     photo: Photo,
+    isBookmarked: Boolean,
     onBookmarkRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -206,9 +219,9 @@ fun BookmarkPhotoGridItem(
                     .zIndex(2f)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Star,
+                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = "Remove bookmark",
-                    tint = Color(0xFFFFD700),
+                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.Gray,
                     modifier = Modifier.size(28.dp)
                 )
             }
