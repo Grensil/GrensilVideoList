@@ -13,7 +13,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,7 +37,7 @@ fun BookmarkScreen(
     }
 
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
-    val tabs = listOf("전체", "비디오", "사진")
+    val tabs = listOf("ALL", "VIDEO", "PHOTO")
 
     // 각 탭의 스크롤 위치를 독립적으로 저장
     val allTabState = rememberLazyGridState()
@@ -73,6 +72,7 @@ fun BookmarkScreen(
                     onPhotoBookmarkRemove = { viewModel.removePhotoBookmark(it) },
                     lazyGridState = allTabState
                 )
+
                 1 -> BookmarkMediaGrid(
                     videos = uiVideos,
                     photos = emptyList(),
@@ -82,6 +82,7 @@ fun BookmarkScreen(
                     onPhotoBookmarkRemove = { },
                     lazyGridState = videoTabState
                 )
+
                 2 -> BookmarkMediaGrid(
                     videos = emptyList(),
                     photos = uiPhotos,
