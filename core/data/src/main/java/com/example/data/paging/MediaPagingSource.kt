@@ -28,8 +28,7 @@ class MediaPagingSource(
                 perPage = videoPerPage
             ).videos.map {
                 val video = it.toDomain()
-                val isBookmarked = localDataSource.getVideoByIdOnce(video.id) != null
-                MediaItem.VideoItem(video, isBookmarked)
+                MediaItem.VideoItem(video)
             }
 
             val photos = remoteDataSource.getCuratedPhotos(
@@ -38,8 +37,7 @@ class MediaPagingSource(
                 perPage = photoPerPage
             ).photos.map {
                 val photo = it.toDomain()
-                val isBookmarked = localDataSource.getPhotoByIdOnce(photo.id) != null
-                MediaItem.PhotoItem(photo, isBookmarked)
+                MediaItem.PhotoItem(photo)
             }
 
             // 비디오와 이미지를 번갈아가면서 섞기

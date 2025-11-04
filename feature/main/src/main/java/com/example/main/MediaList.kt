@@ -40,14 +40,14 @@ fun MediaList(
                 when (mediaItem) {
                     is MediaItem.VideoItem -> VideoItem(
                         video = mediaItem.video,
-                        isBookmarked = bookmarkedVideos[mediaItem.video.id] ?: mediaItem.isBookmarked,
+                        isBookmarked = bookmarkedVideos[mediaItem.video.id] ?: false,
                         onBookmarkClick = { video: Video ->
                             viewModel.toggleVideoBookmark(video)
                         }
                     )
                     is MediaItem.PhotoItem -> PhotoItem(
                         photo = mediaItem.photo,
-                        isBookmarked = bookmarkedPhotos[mediaItem.photo.id] ?: mediaItem.isBookmarked,
+                        isBookmarked = bookmarkedPhotos[mediaItem.photo.id] ?: false,
                         onBookmarkClick = { photo: Photo ->
                             viewModel.togglePhotoBookmark(photo)
                         }
