@@ -56,10 +56,17 @@ class HomeViewModel @Inject constructor(
                 val currentMap = _bookmarkedVideos.value
                 val updatedMap = currentMap.toMutableMap()
 
-                // 현재 추적 중인 ID들 중 DB에서 제거된 항목은 false로 설정
+                // 1. 현재 추적 중인 ID들 중 DB에서 제거된 항목은 false로 설정
                 currentMap.keys.forEach { id ->
                     if (id !in savedIds) {
                         updatedMap[id] = false
+                    }
+                }
+
+                // 2. DB에 있는 항목들 중 Map에 없거나 false인 항목은 true로 설정
+                savedIds.forEach { id ->
+                    if (currentMap[id] != true) {
+                        updatedMap[id] = true
                     }
                 }
 
@@ -73,9 +80,17 @@ class HomeViewModel @Inject constructor(
                 val currentMap = _bookmarkedPhotos.value
                 val updatedMap = currentMap.toMutableMap()
 
+                // 1. 현재 추적 중인 ID들 중 DB에서 제거된 항목은 false로 설정
                 currentMap.keys.forEach { id ->
                     if (id !in savedIds) {
                         updatedMap[id] = false
+                    }
+                }
+
+                // 2. DB에 있는 항목들 중 Map에 없거나 false인 항목은 true로 설정
+                savedIds.forEach { id ->
+                    if (currentMap[id] != true) {
+                        updatedMap[id] = true
                     }
                 }
 
