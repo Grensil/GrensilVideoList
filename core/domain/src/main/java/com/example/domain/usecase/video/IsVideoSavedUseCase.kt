@@ -1,6 +1,6 @@
 package com.example.domain.usecase.video
 
-import com.example.domain.repository.local.VideoRepository
+import com.example.domain.repository.VideoRepository
 import javax.inject.Inject
 
 class IsVideoSavedUseCase @Inject constructor(

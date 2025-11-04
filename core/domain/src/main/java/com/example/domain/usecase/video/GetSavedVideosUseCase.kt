@@ -1,7 +1,7 @@
 package com.example.domain.usecase.video
 
 import com.example.domain.model.Video
-import com.example.domain.repository.local.VideoRepository
+import com.example.domain.repository.VideoRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

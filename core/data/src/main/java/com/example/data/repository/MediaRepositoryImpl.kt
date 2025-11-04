@@ -7,9 +7,15 @@ import com.example.data.datasource.local.MediaLocalDataSource
 import com.example.data.datasource.remote.MediaRemoteDataSource
 import com.example.data.paging.MediaPagingSource
 import com.example.domain.model.MediaItem
-import com.example.domain.repository.remote.MediaRepository
+import com.example.domain.repository.MediaRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Qualifier
+
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ApiKey
 
 class MediaRepositoryImpl @Inject constructor(
     private val remoteDataSource: MediaRemoteDataSource,

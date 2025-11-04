@@ -1,13 +1,10 @@
-package com.example.domain.repository.local
+package com.example.domain.repository
 
 import androidx.paging.PagingData
 import com.example.domain.model.Video
 import kotlinx.coroutines.flow.Flow
 
 interface VideoRepository {
-    // Remote operations
-    suspend fun getPopularVideos(perPage: Int): Result<List<Video>>
-
     // Local database operations - Paging (for large datasets)
     fun getSavedVideosPaged(): Flow<PagingData<Video>>
 

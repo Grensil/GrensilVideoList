@@ -1,4 +1,4 @@
-package com.example.domain.repository.remote
+package com.example.domain.repository
 
 import androidx.paging.PagingData
 import com.example.domain.model.MediaItem

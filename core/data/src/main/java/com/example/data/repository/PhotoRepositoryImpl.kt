@@ -5,18 +5,16 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.example.data.datasource.local.MediaLocalDataSource
-import com.example.data.datasource.remote.MediaRemoteDataSource
 import com.example.data.model.toDomain
 import com.example.data.model.toEntity
 import com.example.domain.model.Photo
-import com.example.domain.repository.local.PhotoRepository
+import com.example.domain.repository.PhotoRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class PhotoRepositoryImpl @Inject constructor(
-    private val localDataSource: MediaLocalDataSource,
-    @ApiKey private val apiKey: String
+    private val localDataSource: MediaLocalDataSource
 ) : PhotoRepository {
 
 

@@ -11,9 +11,9 @@ import com.example.data.repository.ApiKey
 import com.example.data.repository.MediaRepositoryImpl
 import com.example.data.repository.PhotoRepositoryImpl
 import com.example.data.repository.VideoRepositoryImpl
-import com.example.domain.repository.remote.MediaRepository
-import com.example.domain.repository.local.PhotoRepository
-import com.example.domain.repository.local.VideoRepository
+import com.example.domain.repository.MediaRepository
+import com.example.domain.repository.PhotoRepository
+import com.example.domain.repository.VideoRepository
 import com.example.network.api.ImageApi
 import com.example.network.api.VideoApi
 import dagger.Module
@@ -72,21 +72,17 @@ object DataModule {
     @Provides
     @Singleton
     fun provideVideoRepository(
-        remoteDataSource: MediaRemoteDataSource,
-        localDataSource: MediaLocalDataSource,
-        @ApiKey apiKey: String
+        localDataSource: MediaLocalDataSource
     ): VideoRepository {
-        return VideoRepositoryImpl(remoteDataSource, localDataSource, apiKey)
+        return VideoRepositoryImpl(localDataSource)
     }
 
     @Provides
     @Singleton
     fun providePhotoRepository(
-
-        localDataSource: MediaLocalDataSource,
-        @ApiKey apiKey: String
+        localDataSource: MediaLocalDataSource
     ): PhotoRepository {
-        return PhotoRepositoryImpl(localDataSource, apiKey)
+        return PhotoRepositoryImpl(localDataSource)
     }
 
     @Provides

@@ -2,7 +2,7 @@ package com.example.domain.usecase.media
 
 import androidx.paging.PagingData
 import com.example.domain.model.MediaItem
-import com.example.domain.repository.remote.MediaRepository
+import com.example.domain.repository.MediaRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
