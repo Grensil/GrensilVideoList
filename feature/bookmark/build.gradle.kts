@@ -60,4 +60,8 @@ dependencies {
 
     // Coil for Compose
     implementation(libs.coil.compose)
+
+    // Debug - Compose Preview
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

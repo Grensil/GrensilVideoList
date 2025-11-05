@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -79,7 +80,10 @@ fun VideoItem(
                 Icon(
                     imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
-                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.White,
+                    tint = if (isBookmarked)
+                        Color(0xFFFFD700)  // Gold for bookmarked
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),  // Semi-transparent for unbookmarked
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -95,30 +99,35 @@ fun VideoItem(
                 contentDescription = "video  image"
             )
 
-            Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                    .padding(8.dp).align(Alignment.BottomStart), verticalAlignment = Alignment.Bottom
+            ) {
 
                 Text(
                     text = video.user.name,
-                    color = PurpleGrey80
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
                 Text(
                     text = "Duration: ${video.duration}s",
-                    color = PurpleGrey80
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "VideoItem - Not Bookmarked")
 @Composable
 fun PreviewVideoItem() {
     GrensilVideoListTheme {
         VideoItem(
-            Video(
+            video = Video(
                 id = 1,
                 width = 400,
                 height = 200,
@@ -127,7 +136,7 @@ fun PreviewVideoItem() {
                 duration = 55,
                 user = VideoUser(
                     id = 222,
-                    name = "name",
+                    name = "John Creator",
                     url = "url"
                 ),
                 videoFiles = listOf(
@@ -147,7 +156,48 @@ fun PreviewVideoItem() {
                         nr = 0
                     )
                 )
-            )
+            ),
+            isBookmarked = false
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "VideoItem - Bookmarked")
+@Composable
+fun PreviewVideoItemBookmarked() {
+    GrensilVideoListTheme {
+        VideoItem(
+            video = Video(
+                id = 2,
+                width = 400,
+                height = 200,
+                url = "url",
+                image = "image",
+                duration = 120,
+                user = VideoUser(
+                    id = 223,
+                    name = "Jane Creator",
+                    url = "url"
+                ),
+                videoFiles = listOf(
+                    VideoFile(
+                        id = 345,
+                        quality = "4K",
+                        fileType = "fileType",
+                        width = 400,
+                        height = 200,
+                        link = "link"
+                    )
+                ),
+                videoPictures = listOf(
+                    VideoPicture(
+                        id = 2,
+                        picture = "https://images.pexels.com/videos/3571264/free-video-3571264.jpg?auto=compress&cs=tinysrgb&dpr=1&w=500",
+                        nr = 0
+                    )
+                )
+            ),
+            isBookmarked = true
         )
     }
 }

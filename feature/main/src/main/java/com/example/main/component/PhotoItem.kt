@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,12 +25,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import com.example.designsystem.theme.GrensilVideoListTheme
 import com.example.designsystem.theme.PurpleGrey40
 import com.example.designsystem.theme.PurpleGrey80
 import com.example.domain.model.Photo
+import com.example.domain.model.PhotoSrc
 import com.example.main.R
 
 @Composable
@@ -72,7 +76,10 @@ fun PhotoItem(
                 Icon(
                     imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
                     contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
-                    tint = if (isBookmarked) Color(0xFFFFD700) else Color.White,
+                    tint = if (isBookmarked)
+                        Color(0xFFFFD700)  // Gold for bookmarked
+                    else
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),  // Semi-transparent for unbookmarked
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -88,12 +95,76 @@ fun PhotoItem(
                 contentDescription = "video  image"
             )
 
-            Row(modifier = Modifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
+                    .padding(8.dp).align(Alignment.BottomStart), verticalAlignment = Alignment.Bottom
+            ) {
                 Text(
                     text = "Photographer: ${photo.photographer}",
-                    color = PurpleGrey80
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "PhotoItem - Not Bookmarked")
+@Composable
+fun PreviewPhotoItem() {
+    GrensilVideoListTheme {
+        PhotoItem(
+            photo = Photo(
+                id = 1,
+                width = 1920,
+                height = 1080,
+                url = "https://www.pexels.com/photo/1",
+                photographer = "John Doe",
+                photographerUrl = "https://www.pexels.com/@johndoe",
+                avgColor = "#000000",
+                src = PhotoSrc(
+                    original = "https://images.pexels.com/photos/1/pexels-photo-1.jpeg",
+                    large2x = "",
+                    large = "",
+                    medium = "",
+                    small = "",
+                    portrait = "",
+                    landscape = "",
+                    tiny = ""
+                ),
+                alt = "Sample photo"
+            ),
+            isBookmarked = false
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "PhotoItem - Bookmarked")
+@Composable
+fun PreviewPhotoItemBookmarked() {
+    GrensilVideoListTheme {
+        PhotoItem(
+            photo = Photo(
+                id = 2,
+                width = 1920,
+                height = 1080,
+                url = "https://www.pexels.com/photo/2",
+                photographer = "Jane Smith",
+                photographerUrl = "https://www.pexels.com/@janesmith",
+                avgColor = "#FFFFFF",
+                src = PhotoSrc(
+                    original = "https://images.pexels.com/photos/2/pexels-photo-2.jpeg",
+                    large2x = "",
+                    large = "",
+                    medium = "",
+                    small = "",
+                    portrait = "",
+                    landscape = "",
+                    tiny = ""
+                ),
+                alt = "Another sample photo"
+            ),
+            isBookmarked = true
+        )
     }
 }
