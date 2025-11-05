@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,10 +24,11 @@ import com.example.main.component.VideoItem
 @Composable
 fun MediaList(
     mediaPagingItems: LazyPagingItems<MediaItem>,
-    viewModel: HomeViewModel
+    bookmarkedVideos: Map<Long, Boolean>,
+    bookmarkedPhotos: Map<Long, Boolean>,
+    onVideoBookmarkClick: (Video) -> Unit,
+    onPhotoBookmarkClick: (Photo) -> Unit
 ) {
-    val bookmarkedVideos by viewModel.bookmarkedVideos.collectAsState()
-    val bookmarkedPhotos by viewModel.bookmarkedPhotos.collectAsState()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -40,17 +39,13 @@ fun MediaList(
                 when (mediaItem) {
                     is MediaItem.VideoItem -> VideoItem(
                         video = mediaItem.video,
-                        isBookmarked = bookmarkedVideos[mediaItem.video.id] ?: false,
-                        onBookmarkClick = { video: Video ->
-                            viewModel.toggleVideoBookmark(video)
-                        }
+                        isBookmarked = bookmarkedVideos[mediaItem.video.id] == true,
+                        onBookmarkClick = onVideoBookmarkClick
                     )
                     is MediaItem.PhotoItem -> PhotoItem(
                         photo = mediaItem.photo,
-                        isBookmarked = bookmarkedPhotos[mediaItem.photo.id] ?: false,
-                        onBookmarkClick = { photo: Photo ->
-                            viewModel.togglePhotoBookmark(photo)
-                        }
+                        isBookmarked = bookmarkedPhotos[mediaItem.photo.id] == true,
+                        onBookmarkClick = onPhotoBookmarkClick
                     )
                 }
             }
