@@ -1,7 +1,11 @@
 package com.example.main.component
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,30 +15,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.designsystem.theme.BookmarkActive
+import com.example.designsystem.theme.DarkCard
+import com.example.designsystem.theme.GradientEnd
+import com.example.designsystem.theme.GradientStart
 import com.example.designsystem.theme.GrensilVideoListTheme
-import com.example.designsystem.theme.PurpleGrey40
-import com.example.designsystem.theme.PurpleGrey80
+import com.example.designsystem.theme.PhotoBadge
 import com.example.domain.model.Photo
 import com.example.domain.model.PhotoSrc
-import com.example.main.R
 
 @Composable
 fun PhotoItem(
@@ -42,74 +53,130 @@ fun PhotoItem(
     isBookmarked: Boolean = false,
     onBookmarkClick: (Photo) -> Unit = {}
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isBookmarked) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "bookmark_scale"
+    )
+
+    val bookmarkColor by animateColorAsState(
+        targetValue = if (isBookmarked) BookmarkActive else Color.White.copy(alpha = 0.8f),
+        label = "bookmark_color"
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(200.dp)
             .padding(horizontal = 16.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color.Black.copy(alpha = 0.3f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
-
-        Box(contentAlignment = Alignment.TopCenter) {
-
-            Image(
-                painter = painterResource(id = R.drawable.icon_photo),
-                contentDescription = "photo icon",
-                contentScale = ContentScale.Crop,
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Photo image
+            AsyncImage(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .size(32.dp)
-                    .zIndex(1f)
-                    .background(PurpleGrey40)
-                    .align(Alignment.TopStart),
-                alignment = Alignment.TopStart
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+                model = photo.src.large ?: photo.src.original,
+                contentScale = ContentScale.Crop,
+                contentDescription = "photo image"
             )
 
-            // Bookmark icon button (Top Right)
+            // Gradient overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(GradientStart, GradientEnd),
+                            startY = 100f
+                        )
+                    )
+            )
+
+            // Photo badge (Top Left)
+            Box(
+                modifier = Modifier
+                    .padding(12.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(PhotoBadge.copy(alpha = 0.9f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .align(Alignment.TopStart)
+            ) {
+                Text(
+                    text = "PHOTO",
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            // Bookmark button (Top Right)
             IconButton(
                 onClick = { onBookmarkClick(photo) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(4.dp)
-                    .zIndex(2f)
+                    .padding(8.dp)
             ) {
                 Icon(
-                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+                    imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
-                    tint = if (isBookmarked)
-                        Color(0xFFFFD700)  // Gold for bookmarked
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),  // Semi-transparent for unbookmarked
-                    modifier = Modifier.size(32.dp)
+                    tint = bookmarkColor,
+                    modifier = Modifier
+                        .size(28.dp)
+                        .scale(scale)
                 )
             }
 
-            AsyncImage(
+            // Bottom info
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(120.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(PurpleGrey80),
-                model = photo.src.original,
-                contentScale = ContentScale.Crop,
-                contentDescription = "video  image"
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-                    .padding(8.dp).align(Alignment.BottomStart), verticalAlignment = Alignment.Bottom
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Photographer: ${photo.photographer}",
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = photo.photographer,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
+
+                // Resolution chip
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.Black.copy(alpha = 0.6f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "${photo.width}x${photo.height}",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
 }
 
-@Preview(showBackground = true, name = "PhotoItem - Not Bookmarked")
+@Preview(showBackground = true, backgroundColor = 0xFF121212, name = "PhotoItem - Not Bookmarked")
 @Composable
 fun PreviewPhotoItem() {
     GrensilVideoListTheme {
@@ -139,17 +206,17 @@ fun PreviewPhotoItem() {
     }
 }
 
-@Preview(showBackground = true, name = "PhotoItem - Bookmarked")
+@Preview(showBackground = true, backgroundColor = 0xFF121212, name = "PhotoItem - Bookmarked")
 @Composable
 fun PreviewPhotoItemBookmarked() {
     GrensilVideoListTheme {
         PhotoItem(
             photo = Photo(
                 id = 2,
-                width = 1920,
-                height = 1080,
+                width = 3840,
+                height = 2160,
                 url = "https://www.pexels.com/photo/2",
-                photographer = "Jane Smith",
+                photographer = "Jane Smith Photography Studio",
                 photographerUrl = "https://www.pexels.com/@janesmith",
                 avgColor = "#FFFFFF",
                 src = PhotoSrc(

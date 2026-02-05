@@ -8,37 +8,44 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = BookmarkActive,  // Bookmark active color
-    onSurfaceVariant = BookmarkInactiveDark  // Bookmark inactive for dark theme
+    primary = Teal,
+    onPrimary = Color.White,
+    primaryContainer = TealDark,
+    secondary = Coral,
+    onSecondary = Color.White,
+    tertiary = BookmarkActive,
+    background = DarkSurface,
+    surface = DarkSurfaceVariant,
+    surfaceVariant = DarkCard,
+    onBackground = Color.White,
+    onSurface = Color.White,
+    onSurfaceVariant = BookmarkInactiveDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = BookmarkActive,  // Bookmark active color
-    onSurfaceVariant = BookmarkInactiveLight  // Bookmark inactive for light theme
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Teal,
     onPrimary = Color.White,
+    primaryContainer = TealLight,
+    secondary = Coral,
     onSecondary = Color.White,
-    onTertiary = Color.White,
+    tertiary = BookmarkActive,
+    background = Color(0xFFF5F5F5),
+    surface = Color.White,
+    surfaceVariant = Color(0xFFEEEEEE),
     onBackground = Color(0xFF1C1B1F),
     onSurface = Color(0xFF1C1B1F),
-    */
+    onSurfaceVariant = BookmarkInactiveLight
 )
 
 @Composable
 fun GrensilVideoListTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled to use our custom color scheme
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

@@ -1,12 +1,13 @@
 package com.example.bookmark.component
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,31 +18,39 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import com.example.designsystem.theme.BookmarkActive
+import com.example.designsystem.theme.DarkCard
+import com.example.designsystem.theme.GradientEnd
+import com.example.designsystem.theme.GradientStart
 import com.example.designsystem.theme.GrensilVideoListTheme
-import com.example.designsystem.theme.PurpleGrey40
-import com.example.designsystem.theme.PurpleGrey80
+import com.example.designsystem.theme.PhotoBadge
+import com.example.designsystem.theme.VideoBadge
 import com.example.domain.model.Photo
 import com.example.domain.model.PhotoSrc
 import com.example.domain.model.Video
@@ -103,37 +112,84 @@ fun BookmarkVideoGridItem(
     onBookmarkRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isBookmarked) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "bookmark_scale"
+    )
+
+    val bookmarkColor by animateColorAsState(
+        targetValue = if (isBookmarked) BookmarkActive else Color.White.copy(alpha = 0.8f),
+        label = "bookmark_color"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f)
+            .aspectRatio(0.75f),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Video thumbnail
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PurpleGrey80),
-                model = video.videoPictures?.get(0)?.picture,
+                    .clip(RoundedCornerShape(16.dp)),
+                model = video.videoPictures?.getOrNull(0)?.picture,
                 contentScale = ContentScale.Crop,
                 contentDescription = "video image"
             )
 
-            // Video icon overlay (top-left)
-            Image(
-                painter = painterResource(id = com.example.bookmark.R.drawable.icon_video),
-                contentDescription = "video icon",
-                contentScale = ContentScale.Crop,
+            // Gradient overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(GradientStart, GradientEnd),
+                            startY = 80f
+                        )
+                    )
+            )
+
+            // Video badge (top-left)
+            Box(
                 modifier = Modifier
                     .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .size(32.dp)
-                    .zIndex(1f)
-                    .background(PurpleGrey40.copy(alpha = 0.5f))
-                    .align(Alignment.TopStart),
-                alignment = Alignment.TopStart
-            )
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(VideoBadge.copy(alpha = 0.9f))
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                    .align(Alignment.TopStart)
+            ) {
+                Text(
+                    text = "VIDEO",
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+
+            // Play button (Center)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.9f))
+                    .align(Alignment.Center),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = "Play video",
+                    tint = VideoBadge,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
             // Bookmark icon button (top-right)
             IconButton(
@@ -141,16 +197,14 @@ fun BookmarkVideoGridItem(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
-                    .zIndex(2f)
             ) {
                 Icon(
-                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+                    imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Remove bookmark",
-                    tint = if (isBookmarked)
-                        Color(0xFFFFD700)  // Gold for bookmarked
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),  // Semi-transparent for unbookmarked
-                    modifier = Modifier.size(28.dp)
+                    tint = bookmarkColor,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .scale(scale)
                 )
             }
 
@@ -159,23 +213,33 @@ fun BookmarkVideoGridItem(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-                    .padding(8.dp)
+                    .padding(10.dp)
             ) {
                 Text(
                     text = video.user.name,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Duration: ${video.duration}s",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = formatDuration(video.duration),
+                    color = Color.White.copy(alpha = 0.7f),
                     fontSize = 10.sp
                 )
             }
         }
+    }
+}
+
+private fun formatDuration(seconds: Int): String {
+    val minutes = seconds / 60
+    val secs = seconds % 60
+    return if (minutes > 0) {
+        "${minutes}:${secs.toString().padStart(2, '0')}"
+    } else {
+        "0:${secs.toString().padStart(2, '0')}"
     }
 }
 
@@ -186,37 +250,67 @@ fun BookmarkPhotoGridItem(
     onBookmarkRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (isBookmarked) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "bookmark_scale"
+    )
+
+    val bookmarkColor by animateColorAsState(
+        targetValue = if (isBookmarked) BookmarkActive else Color.White.copy(alpha = 0.8f),
+        label = "bookmark_color"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f)
+            .aspectRatio(0.75f),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             // Photo image
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(PurpleGrey80),
-                model = photo.src.original,
+                    .clip(RoundedCornerShape(16.dp)),
+                model = photo.src.medium ?: photo.src.original,
                 contentScale = ContentScale.Crop,
                 contentDescription = "photo image"
             )
 
-            // Photo icon overlay (top-left)
-            Image(
-                painter = painterResource(id = com.example.bookmark.R.drawable.icon_photo),
-                contentDescription = "photo icon",
-                contentScale = ContentScale.Crop,
+            // Gradient overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(GradientStart, GradientEnd),
+                            startY = 80f
+                        )
+                    )
+            )
+
+            // Photo badge (top-left)
+            Box(
                 modifier = Modifier
                     .padding(8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .size(32.dp)
-                    .zIndex(1f)
-                    .background(PurpleGrey40.copy(alpha = 0.5f))
-                    .align(Alignment.TopStart),
-                alignment = Alignment.TopStart
-            )
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(PhotoBadge.copy(alpha = 0.9f))
+                    .padding(horizontal = 6.dp, vertical = 3.dp)
+                    .align(Alignment.TopStart)
+            ) {
+                Text(
+                    text = "PHOTO",
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
 
             // Bookmark icon button (top-right)
             IconButton(
@@ -224,16 +318,14 @@ fun BookmarkPhotoGridItem(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
-                    .zIndex(2f)
             ) {
                 Icon(
-                    imageVector = if (isBookmarked) Icons.Filled.Star else Icons.Outlined.Star,
+                    imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Remove bookmark",
-                    tint = if (isBookmarked)
-                        Color(0xFFFFD700)  // Gold for bookmarked
-                    else
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),  // Semi-transparent for unbookmarked
-                    modifier = Modifier.size(28.dp)
+                    tint = bookmarkColor,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .scale(scale)
                 )
             }
 
@@ -242,13 +334,13 @@ fun BookmarkPhotoGridItem(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f))
-                    .padding(8.dp)
+                    .padding(10.dp)
             ) {
                 Text(
-                    text = "Photographer: ${photo.photographer}",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = photo.photographer,
+                    color = Color.White,
                     fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -257,7 +349,7 @@ fun BookmarkPhotoGridItem(
     }
 }
 
-@Preview(showBackground = true, name = "BookmarkMediaGrid - Mixed Content")
+@Preview(showBackground = true, backgroundColor = 0xFF121212, name = "BookmarkMediaGrid - Mixed Content")
 @Composable
 fun PreviewBookmarkMediaGrid() {
     GrensilVideoListTheme {
@@ -374,7 +466,7 @@ fun PreviewBookmarkMediaGrid() {
     }
 }
 
-@Preview(showBackground = true, name = "BookmarkMediaGrid - Empty")
+@Preview(showBackground = true, backgroundColor = 0xFF121212, name = "BookmarkMediaGrid - Empty")
 @Composable
 fun PreviewBookmarkMediaGridEmpty() {
     GrensilVideoListTheme {
