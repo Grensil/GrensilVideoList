@@ -55,6 +55,7 @@ import com.example.designsystem.theme.BookmarkActive
 import com.example.designsystem.theme.DarkBackground
 import com.example.designsystem.theme.DarkSurface
 import com.example.designsystem.theme.Teal
+import com.example.designsystem.util.TimeFormatUtils
 import com.example.domain.model.Video
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -244,7 +245,7 @@ fun VideoDetailScreen(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    VideoInfoRow(label = "Duration", value = formatDuration(video.duration))
+                    VideoInfoRow(label = "Duration", value = TimeFormatUtils.formatDurationLong(video.duration))
                     VideoInfoRow(label = "Resolution", value = "${video.width}x${video.height}")
                     VideoInfoRow(
                         label = "Quality",
@@ -280,12 +281,3 @@ private fun VideoInfoRow(label: String, value: String) {
     }
 }
 
-private fun formatDuration(seconds: Int): String {
-    val minutes = seconds / 60
-    val secs = seconds % 60
-    return if (minutes > 0) {
-        "${minutes}m ${secs}s"
-    } else {
-        "${secs}s"
-    }
-}

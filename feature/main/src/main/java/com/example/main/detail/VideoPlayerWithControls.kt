@@ -49,6 +49,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.example.designsystem.theme.Teal
+import com.example.designsystem.util.TimeFormatUtils
 import com.example.player.PlaybackState
 import kotlinx.coroutines.delay
 
@@ -212,7 +213,7 @@ fun VideoPlayerWithControls(
                         // 현재 시간 / 전체 시간
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = formatTime(playbackState.currentPosition),
+                                text = TimeFormatUtils.formatTime(playbackState.currentPosition),
                                 color = Color.White,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
@@ -223,7 +224,7 @@ fun VideoPlayerWithControls(
                                 fontSize = 12.sp
                             )
                             Text(
-                                text = formatTime(playbackState.duration),
+                                text = TimeFormatUtils.formatTime(playbackState.duration),
                                 color = Color.White.copy(alpha = 0.7f),
                                 fontSize = 12.sp
                             )
@@ -249,12 +250,4 @@ fun VideoPlayerWithControls(
             }
         }
     }
-}
-
-private fun formatTime(ms: Long): String {
-    if (ms <= 0) return "0:00"
-    val totalSeconds = ms / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "${minutes}:${seconds.toString().padStart(2, '0')}"
 }

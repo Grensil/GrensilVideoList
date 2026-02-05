@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
@@ -71,7 +70,6 @@ fun ImagePreviewDialog(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var showOptions by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     Dialog(
@@ -85,7 +83,7 @@ fun ImagePreviewDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.7f))  // 더 투명하게
+                .background(Color.Black.copy(alpha = 0.7f))
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null
@@ -122,66 +120,69 @@ fun ImagePreviewDialog(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { showOptions = !showOptions }
+                        ) { /* 이미지 클릭 시 닫히지 않음 */ }
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // 옵션 버튼들
-                if (showOptions || true) {  // 항상 표시
-                    Surface(
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { /* 클릭 전파 방지 */ },
+                    shape = RoundedCornerShape(16.dp),
+                    color = Color.White.copy(alpha = 0.15f)
+                ) {
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth(0.9f)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { /* 클릭 전파 방지 */ },
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color.White.copy(alpha = 0.15f)
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            // 다운로드 버튼
-                            OptionButton(
-                                icon = ImageVector.vectorResource(R.drawable.ic_download),
-                                label = "Save",
-                                isLoading = isLoading,
-                                onClick = {
-                                    scope.launch {
-                                        isLoading = true
-                                        saveImageToGallery(context, imageUrl)
-                                        isLoading = false
-                                    }
+                        // 다운로드 버튼
+                        OptionButton(
+                            icon = ImageVector.vectorResource(R.drawable.ic_download),
+                            label = "Save",
+                            isLoading = isLoading,
+                            onClick = {
+                                scope.launch {
+                                    isLoading = true
+                                    saveImageToGallery(context, imageUrl)
+                                    isLoading = false
                                 }
-                            )
+                            }
+                        )
 
-                            // 공유 버튼
-                            OptionButton(
-                                icon = Icons.Default.Share,
-                                label = "Share",
-                                onClick = {
-                                    scope.launch {
-                                        isLoading = true
-                                        shareImage(context, imageUrl)
-                                        isLoading = false
-                                    }
+                        // 공유 버튼
+                        OptionButton(
+                            icon = Icons.Default.Share,
+                            label = "Share",
+                            isLoading = isLoading,
+                            onClick = {
+                                scope.launch {
+                                    isLoading = true
+                                    shareImage(context, imageUrl)
+                                    isLoading = false
                                 }
-                            )
-                        }
+                            }
+                        )
                     }
                 }
             }
 
             // 로딩 인디케이터
             if (isLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
+                }
             }
         }
     }
@@ -228,7 +229,6 @@ private suspend fun saveImageToGallery(context: Context, imageUrl: String) {
             val result = context.imageLoader.execute(request)
             if (result is SuccessResult) {
                 val bitmap = result.drawable.toBitmap()
-
                 val filename = "IMG_${System.currentTimeMillis()}.jpg"
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -257,13 +257,6 @@ private suspend fun saveImageToGallery(context: Context, imageUrl: String) {
                     FileOutputStream(file).use { stream ->
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                     }
-                    // 갤러리에 알림
-                    MediaStore.Images.Media.insertImage(
-                        context.contentResolver,
-                        file.absolutePath,
-                        filename,
-                        null
-                    )
                 }
 
                 withContext(Dispatchers.Main) {
@@ -290,7 +283,6 @@ private suspend fun shareImage(context: Context, imageUrl: String) {
             if (result is SuccessResult) {
                 val bitmap = result.drawable.toBitmap()
 
-                // 캐시 디렉토리에 임시 파일 저장
                 val cachePath = File(context.cacheDir, "images")
                 cachePath.mkdirs()
                 val file = File(cachePath, "share_image.jpg")
@@ -298,7 +290,6 @@ private suspend fun shareImage(context: Context, imageUrl: String) {
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                 }
 
-                // FileProvider를 통해 URI 생성
                 val uri = FileProvider.getUriForFile(
                     context,
                     "${context.packageName}.fileprovider",

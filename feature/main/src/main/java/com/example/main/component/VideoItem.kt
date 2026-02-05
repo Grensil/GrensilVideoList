@@ -48,6 +48,7 @@ import com.example.designsystem.theme.GradientEnd
 import com.example.designsystem.theme.GradientStart
 import com.example.designsystem.theme.GrensilVideoListTheme
 import com.example.designsystem.theme.VideoBadge
+import com.example.designsystem.util.TimeFormatUtils
 import com.example.domain.model.Video
 import com.example.domain.model.VideoFile
 import com.example.domain.model.VideoPicture
@@ -223,9 +224,9 @@ fun VideoItem(
                     ) {
                         Text(
                             text = if (isPreviewPlaying && remainingSeconds > 0) {
-                                formatRemainingTime(remainingSeconds)
+                                TimeFormatUtils.formatDuration(remainingSeconds)
                             } else {
-                                formatDuration(video.duration)
+                                TimeFormatUtils.formatDuration(video.duration)
                             },
                             color = Color.White,
                             fontSize = 12.sp,
@@ -238,25 +239,6 @@ fun VideoItem(
     }
 }
 
-private fun formatDuration(seconds: Int): String {
-    val minutes = seconds / 60
-    val secs = seconds % 60
-    return if (minutes > 0) {
-        "${minutes}:${secs.toString().padStart(2, '0')}"
-    } else {
-        "0:${secs.toString().padStart(2, '0')}"
-    }
-}
-
-private fun formatRemainingTime(seconds: Int): String {
-    val minutes = seconds / 60
-    val secs = seconds % 60
-    return if (minutes > 0) {
-        "${minutes}:${secs.toString().padStart(2, '0')}"
-    } else {
-        "0:${secs.toString().padStart(2, '0')}"
-    }
-}
 
 @Preview(showBackground = true, backgroundColor = 0xFF121212, name = "VideoItem - Not Bookmarked")
 @Composable

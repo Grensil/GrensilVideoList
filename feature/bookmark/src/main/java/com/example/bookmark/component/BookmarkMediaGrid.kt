@@ -52,6 +52,7 @@ import com.example.designsystem.theme.GradientStart
 import com.example.designsystem.theme.GrensilVideoListTheme
 import com.example.designsystem.theme.PhotoBadge
 import com.example.designsystem.theme.VideoBadge
+import com.example.designsystem.util.TimeFormatUtils
 import com.example.domain.model.Photo
 import com.example.domain.model.PhotoSrc
 import com.example.domain.model.Video
@@ -231,7 +232,7 @@ fun BookmarkVideoGridItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = formatDuration(video.duration),
+                    text = TimeFormatUtils.formatDuration(video.duration),
                     color = Color.White.copy(alpha = 0.7f),
                     fontSize = 10.sp
                 )
@@ -240,15 +241,6 @@ fun BookmarkVideoGridItem(
     }
 }
 
-private fun formatDuration(seconds: Int): String {
-    val minutes = seconds / 60
-    val secs = seconds % 60
-    return if (minutes > 0) {
-        "${minutes}:${secs.toString().padStart(2, '0')}"
-    } else {
-        "0:${secs.toString().padStart(2, '0')}"
-    }
-}
 
 @Composable
 fun BookmarkPhotoGridItem(
