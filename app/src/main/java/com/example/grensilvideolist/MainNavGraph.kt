@@ -24,33 +24,45 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.bookmark.BookmarkScreen
 import com.example.designsystem.theme.PurpleGrey40
 import com.example.designsystem.theme.PurpleGrey80
 import com.example.main.HomeScreen
+import com.example.main.detail.VideoDetailScreen
+import com.example.main.player.VideoPlayerManager
 
 @Composable
-fun MainScreen() {
+fun MainScreen(videoPlayerManager: VideoPlayerManager? = null) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // VideoDetail 화면에서는 하단 바 숨기기
+    val showBottomBar = currentRoute != null && !currentRoute.startsWith("videoDetail")
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavBar(navController)
+            if (showBottomBar) {
+                BottomNavBar(navController)
+            }
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    bottom = innerPadding.calculateBottomPadding(),
+                    bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 0.dp,
                     top = innerPadding.calculateTopPadding()
                 )
         ) {
             MainNavGraph(
-                navController = navController
+                navController = navController,
+                videoPlayerManager = videoPlayerManager
             )
         }
     }
@@ -109,13 +121,37 @@ fun BottomNavBar(navController: NavHostController) {
 }
 
 @Composable
-fun MainNavGraph(navController: NavHostController) {
+fun MainNavGraph(
+    navController: NavHostController,
+    videoPlayerManager: VideoPlayerManager? = null
+) {
     NavHost(navController = navController, startDestination = Routes.Home.path) {
-        composable(route = Routes.Home.path) { backStackEntry ->
-            HomeScreen(navController = navController)
+        composable(route = Routes.Home.path) {
+            HomeScreen(
+                navController = navController,
+                onVideoClick = { videoId ->
+                    navController.navigate(Routes.VideoDetail.createRoute(videoId))
+                }
+            )
         }
-        composable(route = Routes.Bookmark.path) { backStackEntry ->
+        composable(route = Routes.Bookmark.path) {
             BookmarkScreen(navController = navController)
+        }
+        composable(
+            route = Routes.VideoDetail.path,
+            arguments = listOf(navArgument("videoId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val videoId = backStackEntry.arguments?.getLong("videoId") ?: return@composable
+
+            // VideoPlayerManager에서 현재 비디오 가져오기
+            videoPlayerManager?.currentVideo?.let { video ->
+                if (video.id == videoId) {
+                    VideoDetailScreen(
+                        video = video,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+            }
         }
     }
 }

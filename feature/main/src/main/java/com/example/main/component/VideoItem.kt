@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.exoplayer.ExoPlayer
 import coil.compose.AsyncImage
 import com.example.designsystem.theme.BookmarkActive
 import com.example.designsystem.theme.DarkCard
@@ -56,7 +58,12 @@ import com.example.domain.model.VideoUser
 fun VideoItem(
     video: Video,
     isBookmarked: Boolean = false,
-    onBookmarkClick: (Video) -> Unit = {}
+    isPreviewPlaying: Boolean = false,
+    playbackProgress: Float = 0f,
+    remainingSeconds: Int = 0,
+    exoPlayer: ExoPlayer? = null,
+    onBookmarkClick: (Video) -> Unit = {},
+    onVideoClick: (Video) -> Unit = {}
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isBookmarked) 1.2f else 1f,
@@ -81,20 +88,30 @@ fun VideoItem(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(16.dp),
                 ambientColor = Color.Black.copy(alpha = 0.3f)
-            ),
+            )
+            .clickable { onVideoClick(video) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Thumbnail
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
-                model = video.videoPictures?.getOrNull(0)?.picture,
-                contentScale = ContentScale.Crop,
-                contentDescription = "video thumbnail"
-            )
+            // Video preview or Thumbnail
+            if (isPreviewPlaying && exoPlayer != null) {
+                VideoPreviewSurface(
+                    exoPlayer = exoPlayer,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            } else {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp)),
+                    model = video.videoPictures?.getOrNull(0)?.picture,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "video thumbnail"
+                )
+            }
 
             // Gradient overlay
             Box(
@@ -126,21 +143,23 @@ fun VideoItem(
                 )
             }
 
-            // Play button (Center)
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.9f))
-                    .align(Alignment.Center),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = "Play video",
-                    tint = VideoBadge,
-                    modifier = Modifier.size(32.dp)
-                )
+            // Play button (Center) - 프리뷰 재생 중이 아닐 때만 표시
+            if (!isPreviewPlaying) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.9f))
+                        .align(Alignment.Center),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = "Play video",
+                        tint = VideoBadge,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
             }
 
             // Bookmark button (Top Right)
@@ -192,6 +211,38 @@ fun VideoItem(
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
+                }
+            }
+
+            // Progress bar with remaining time (Bottom) - 프리뷰 재생 중일 때 표시
+            if (isPreviewPlaying) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                ) {
+                    VideoProgressBar(
+                        progress = playbackProgress,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    // 남은 시간 표시
+                    if (remainingSeconds > 0) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 8.dp, bottom = 8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Color.Black.copy(alpha = 0.7f))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = "$remainingSeconds",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }

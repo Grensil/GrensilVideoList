@@ -17,10 +17,16 @@ import androidx.compose.ui.unit.dp
 import com.example.designsystem.theme.GrensilVideoListTheme
 import com.example.grensilvideolist.security.ScreenSecurityHelper
 import com.example.grensilvideolist.security.SecureScreenEffect
+import com.example.main.player.VideoPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var videoPlayerManager: VideoPlayerManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -37,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     SecureScreenEffect()
                 }
 
-                MainScreen()
+                MainScreen(videoPlayerManager = videoPlayerManager)
             }
         }
     }

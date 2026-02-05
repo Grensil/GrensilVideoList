@@ -16,10 +16,14 @@ import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.GetBookmarkedVideosStateUseCase
 import com.example.domain.usecase.video.IsVideoSavedUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
+import com.example.main.player.VideoPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,8 +38,35 @@ class HomeViewModel @Inject constructor(
     private val isVideoSavedUseCase: IsVideoSavedUseCase,
     private val isPhotoSavedUseCase: IsPhotoSavedUseCase,
     private val getBookmarkedVideosStateUseCase: GetBookmarkedVideosStateUseCase,
-    private val getBookmarkedPhotosStateUseCase: GetBookmarkedPhotosStateUseCase
+    private val getBookmarkedPhotosStateUseCase: GetBookmarkedPhotosStateUseCase,
+    val videoPlayerManager: VideoPlayerManager
 ) : ViewModel() {
+
+    // 현재 프리뷰 재생 중인 비디오 ID
+    private val _currentPlayingVideoId = MutableStateFlow<Long?>(null)
+    val currentPlayingVideoId: StateFlow<Long?> = _currentPlayingVideoId.asStateFlow()
+
+    // 재생 진행률
+    val playbackProgress: StateFlow<Float> = videoPlayerManager.playbackState
+        .map { it.progress }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0f
+        )
+
+    // 남은 시간 (초)
+    val remainingSeconds: StateFlow<Int> = videoPlayerManager.playbackState
+        .map { state ->
+            if (state.duration > 0) {
+                ((state.duration - state.currentPosition) / 1000).toInt().coerceAtLeast(0)
+            } else 0
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0
+        )
 
     val mediaPagingData: Flow<PagingData<MediaItem>> =
         getMediaPagingDataUseCase().cachedIn(viewModelScope)
@@ -75,5 +106,44 @@ class HomeViewModel @Inject constructor(
                 savePhotoUseCase(photo)
             }
         }
+    }
+
+    fun onCenterVideoChanged(video: Video?) {
+        if (video == null) {
+            stopPreview()
+            return
+        }
+
+        if (_currentPlayingVideoId.value == video.id) {
+            return // 같은 비디오면 스킵
+        }
+
+        _currentPlayingVideoId.value = video.id
+        startPreviewPlayback(video)
+    }
+
+    private fun startPreviewPlayback(video: Video) {
+        val url = video.videoFiles.maxByOrNull { it.width * it.height }?.link ?: return
+        videoPlayerManager.prepare(
+            videoId = video.id,
+            url = url,
+            muted = true,
+            autoPlay = true
+        )
+    }
+
+    fun stopPreview() {
+        _currentPlayingVideoId.value = null
+        videoPlayerManager.stop()
+    }
+
+    fun onVideoClicked(video: Video) {
+        // 네비게이션 전에 현재 비디오 저장
+        videoPlayerManager.setCurrentVideo(video)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        videoPlayerManager.release()
     }
 }

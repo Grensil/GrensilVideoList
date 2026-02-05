@@ -61,6 +61,10 @@ dependencies {
     // Coil for Compose
     implementation(libs.coil.compose)
 
+    // Media3 ExoPlayer
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+
     // Debug - Compose Preview
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

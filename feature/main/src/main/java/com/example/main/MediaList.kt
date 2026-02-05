@@ -9,9 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.designsystem.theme.ShimmerBase
@@ -48,10 +49,17 @@ fun MediaList(
     mediaPagingItems: LazyPagingItems<MediaItem>,
     bookmarkedVideos: Map<Long, Boolean>,
     bookmarkedPhotos: Map<Long, Boolean>,
+    currentPlayingVideoId: Long?,
+    playbackProgress: Float,
+    remainingSeconds: Int,
+    exoPlayer: ExoPlayer?,
+    listState: LazyListState = rememberLazyListState(),
     onVideoBookmarkClick: (Video) -> Unit,
-    onPhotoBookmarkClick: (Photo) -> Unit
+    onPhotoBookmarkClick: (Photo) -> Unit,
+    onVideoClick: (Video) -> Unit
 ) {
     LazyColumn(
+        state = listState,
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 16.dp)
@@ -62,7 +70,12 @@ fun MediaList(
                     is MediaItem.VideoItem -> VideoItem(
                         video = mediaItem.video,
                         isBookmarked = bookmarkedVideos[mediaItem.video.id] == true,
-                        onBookmarkClick = onVideoBookmarkClick
+                        isPreviewPlaying = mediaItem.video.id == currentPlayingVideoId,
+                        playbackProgress = if (mediaItem.video.id == currentPlayingVideoId) playbackProgress else 0f,
+                        remainingSeconds = if (mediaItem.video.id == currentPlayingVideoId) remainingSeconds else 0,
+                        exoPlayer = if (mediaItem.video.id == currentPlayingVideoId) exoPlayer else null,
+                        onBookmarkClick = onVideoBookmarkClick,
+                        onVideoClick = onVideoClick
                     )
                     is MediaItem.PhotoItem -> PhotoItem(
                         photo = mediaItem.photo,

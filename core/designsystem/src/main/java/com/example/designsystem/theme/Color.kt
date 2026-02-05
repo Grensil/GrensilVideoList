@@ -12,6 +12,7 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 // Modern Media App Color Palette
+val DarkBackground = Color(0xFF0A0A0A)
 val DarkSurface = Color(0xFF121212)
 val DarkSurfaceVariant = Color(0xFF1E1E1E)
 val DarkCard = Color(0xFF252525)
