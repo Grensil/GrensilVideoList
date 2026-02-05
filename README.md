@@ -1,70 +1,77 @@
 # Grensil Video List
 
-Android application for browsing videos and photos from Pexels API.(https://www.pexels.com/api/)
+Pexels API를 활용한 비디오 및 사진 브라우징 Android 애플리케이션입니다. (https://www.pexels.com/api/)
 
-## Features
+## 주요 기능
 
-- Browse popular videos and photos
-- Bookmark favorite media
+- 인기 비디오 및 사진 탐색
+- 유튜브 스타일 자동 재생 프리뷰
+- 비디오 상세 재생 (전체화면 지원)
+- 이미지 확대 보기 (저장/공유 기능)
+- 즐겨찾기 북마크 기능
 - Material Design 3 UI
-- Multi-module architecture
+- 멀티 모듈 아키텍처
 
-## Architecture
+## 아키텍처
 
-- **Clean Architecture** with MVVM pattern
-- **Multi-module** structure (app, core, feature modules)
-- **Dependency Injection** with Hilt
-- **Reactive Programming** with Kotlin Flow
-- **Local Storage** with Room Database
-- **Network** with Retrofit + OkHttp
+- **Clean Architecture** + MVVM 패턴
+- **멀티 모듈** 구조 (app, core, feature 모듈)
+- **의존성 주입** - Hilt
+- **반응형 프로그래밍** - Kotlin Flow
+- **로컬 저장소** - Room Database
+- **네트워크** - Retrofit + OkHttp
 
-## Setup
+## 설정 방법
 
-1. Clone the repository
+1. 저장소 클론
 ```bash
 git clone [repository-url]
 cd GrensilVideoList
 ```
 
-2. Get API Key from [Pexels](https://www.pexels.com/api/)
+2. [Pexels](https://www.pexels.com/api/)에서 API Key 발급
 
-3. Create `local.properties` in the project root:
+3. 프로젝트 루트에 `local.properties` 생성:
 ```properties
 sdk.dir=/path/to/android/sdk
 API_KEY=your_pexels_api_key_here
 ```
 
-4. Build and run
+4. 빌드 및 실행
 ```bash
 ./gradlew assembleDebug
 ```
 
-## Module Structure
+## 모듈 구조
 
 ```
-app/                    # Application module
+app/                    # 애플리케이션 모듈
 core/
-  ├── data/            # Data layer (repositories, data sources)
-  ├── domain/          # Domain layer (use cases, models)
-  ├── network/         # Network layer (API services)
-  └── designsystem/    # Design system (themes, components)
+  ├── data/            # 데이터 레이어 (Repository, DataSource)
+  ├── domain/          # 도메인 레이어 (UseCase, Model)
+  ├── network/         # 네트워크 레이어 (API 서비스)
+  ├── player/          # 비디오 플레이어 (ExoPlayer 관리)
+  └── designsystem/    # 디자인 시스템 (테마, 컴포넌트)
 feature/
-  ├── main/            # Home screen feature
-  └── bookmark/        # Bookmark feature
+  ├── main/            # 홈 화면 및 비디오 상세
+  └── bookmark/        # 북마크 기능
 ```
 
-## Tech Stack
+## 기술 스택
 
-- **Language**: Kotlin
-- **UI**: Jetpack Compose
-- **DI**: Hilt
-- **Network**: Retrofit, OkHttp
-- **Database**: Room
-- **Image Loading**: Coil
-- **Async**: Kotlin Coroutines + Flow
-- **Paging**: Paging 3
+| 분류 | 기술 |
+|------|------|
+| **언어** | Kotlin |
+| **UI** | Jetpack Compose |
+| **DI** | Hilt |
+| **네트워크** | Retrofit, OkHttp |
+| **데이터베이스** | Room |
+| **이미지 로딩** | Coil |
+| **비동기** | Kotlin Coroutines + Flow |
+| **페이징** | Paging 3 |
+| **비디오** | Media3 ExoPlayer |
 
-## Security
+## 보안
 
 이 앱은 **금융앱 수준의 보안**을 적용하고 있습니다.
 
@@ -95,10 +102,10 @@ feature/
 
 ### 보안 문서
 자세한 보안 설정은 다음 문서를 참고하세요:
-- [📖 보안 설정 가이드](SECURITY_GUIDE.md) - 상세 보안 구현 가이드
-- [✅ 보안 체크리스트](SECURITY_CHECKLIST.md) - Play Store 배포 전 체크리스트
-- [🔑 Keystore 설정](KEYSTORE_SETUP.md) - 앱 서명 설정 가이드
+- [보안 설정 가이드](SECURITY_GUIDE.md) - 상세 보안 구현 가이드
+- [보안 체크리스트](SECURITY_CHECKLIST.md) - Play Store 배포 전 체크리스트
+- [Keystore 설정](KEYSTORE_SETUP.md) - 앱 서명 설정 가이드
 
-## License
+## 라이선스
 
-[Add your license here]
+MIT License
