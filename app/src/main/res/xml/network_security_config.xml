@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Production configuration -->
+    <!-- Base config -->
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
-            <!-- Trust system certificates -->
             <certificates src="system" />
         </trust-anchors>
     </base-config>
 
-    <!-- Debug configuration (allow localhost for testing) -->
+    <!-- Debug: trust user certificates for proxy tools -->
     <debug-overrides>
         <trust-anchors>
             <certificates src="system" />
             <certificates src="user" />
         </trust-anchors>
     </debug-overrides>
-
-    <!-- Domain-specific configuration for Pexels API -->
-    <domain-config cleartextTrafficPermitted="false">
-        <domain includeSubdomains="true">api.pexels.com</domain>
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </domain-config>
 </network-security-config>

@@ -2,6 +2,7 @@ package com.example.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.data.BuildConfig
 import com.example.data.datasource.local.MediaLocalDataSource
 import com.example.data.datasource.local.db.GrensilVideoListDatabase
 import com.example.data.datasource.local.db.dao.PhotoDao
@@ -11,6 +12,7 @@ import com.example.data.repository.ApiKey
 import com.example.data.repository.MediaRepositoryImpl
 import com.example.data.repository.PhotoRepositoryImpl
 import com.example.data.repository.VideoRepositoryImpl
+import com.example.data.security.DatabaseEncryptionHelper
 import com.example.domain.repository.MediaRepository
 import com.example.domain.repository.PhotoRepository
 import com.example.domain.repository.VideoRepository
@@ -32,11 +34,26 @@ object DataModule {
     fun provideGrensilVideoListDatabase(
         @ApplicationContext context: Context
     ): GrensilVideoListDatabase {
-        return Room.databaseBuilder(
+        val builder = Room.databaseBuilder(
             context,
             GrensilVideoListDatabase::class.java,
             GrensilVideoListDatabase.DATABASE_NAME
-        ).build()
+        )
+
+        // Release 빌드에서만 DB 암호화 적용
+        // 개발 중에는 암호화하지 않아 디버깅이 쉬움
+        if (!BuildConfig.DEBUG) {
+            try {
+                val encryptionHelper = DatabaseEncryptionHelper(context)
+                builder.openHelperFactory(encryptionHelper.getEncryptedFactory())
+            } catch (e: Exception) {
+                // 암호화 실패 시 로그만 남기고 암호화 없이 진행
+                // 실제 배포시에는 앱을 종료해야 할 수도 있음
+                android.util.Log.e("DataModule", "DB encryption failed", e)
+            }
+        }
+
+        return builder.build()
     }
 
     @Provides

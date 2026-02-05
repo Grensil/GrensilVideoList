@@ -32,6 +32,9 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -59,7 +62,21 @@ dependencies {
     // Gson (for Room TypeConverters)
     implementation(libs.gson)
 
+    // Security - Encrypted Room Database
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.sqlcipher)
+
+    // Unit Tests
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(kotlin("test"))
+
+    // Android Instrumented Tests (실제 DB 테스트용)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.arch.core.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.paging.compose)  // Paging 테스트 유틸
 }

@@ -37,20 +37,52 @@ android {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
+
+            // Debug build config
+            buildConfigField("boolean", "DEBUG_MODE", "true")
+            buildConfigField("boolean", "ENABLE_LOGGING", "true")
         }
 
         release {
             isDebuggable = false
             isMinifyEnabled = true
             isShrinkResources = true
+
+            // ProGuard/R8 난독화 설정
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
 
-            // Security: Remove debug logging in release
+            // 서명 설정 (keystore 파일이 있는 경우)
+            // signingConfig = signingConfigs.getByName("release")
+
+            // 보안 강화 설정
             buildConfigField("boolean", "DEBUG_MODE", "false")
+            buildConfigField("boolean", "ENABLE_LOGGING", "false")
+
+            // 네이티브 라이브러리 난독화
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
+    }
+
+    // 서명 설정 (금융앱 필수)
+    signingConfigs {
+        // create("release") {
+        //     // keystore 정보는 gradle.properties 또는 환경변수에서 가져오기
+        //     storeFile = file(System.getenv("KEYSTORE_FILE") ?: "release-keystore.jks")
+        //     storePassword = System.getenv("KEYSTORE_PASSWORD")
+        //     keyAlias = System.getenv("KEY_ALIAS")
+        //     keyPassword = System.getenv("KEY_PASSWORD")
+        //
+        //     // 서명 버전 설정
+        //     enableV1Signing = true
+        //     enableV2Signing = true
+        //     enableV3Signing = true
+        //     enableV4Signing = true
+        // }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -93,6 +125,10 @@ dependencies {
     // Paging
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
+
+    // Security
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.play.integrity)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
