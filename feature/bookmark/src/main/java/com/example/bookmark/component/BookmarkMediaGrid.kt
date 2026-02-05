@@ -36,9 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +60,16 @@ import com.example.domain.model.Video
 import com.example.domain.model.VideoFile
 import com.example.domain.model.VideoPicture
 import com.example.domain.model.VideoUser
+
+// 북마크 상태에 따른 투명도 상수
+private const val BOOKMARKED_ALPHA = 1f
+private const val UNBOOKMARKED_ALPHA = 0.5f
+
+// 공통 애니메이션 스펙
+private val bookmarkAnimationSpec = spring<Float>(
+    dampingRatio = Spring.DampingRatioMediumBouncy,
+    stiffness = Spring.StiffnessLow
+)
 
 @Composable
 fun BookmarkMediaGrid(
@@ -122,10 +132,7 @@ fun BookmarkVideoGridItem(
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isBookmarked) 1.2f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        animationSpec = bookmarkAnimationSpec,
         label = "bookmark_scale"
     )
 
@@ -136,11 +143,8 @@ fun BookmarkVideoGridItem(
 
     // 북마크 해제 시 투명도 효과 (아이템이 곧 사라질 것임을 시각적으로 표시)
     val cardAlpha by animateFloatAsState(
-        targetValue = if (isBookmarked) 1f else 0.5f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        targetValue = if (isBookmarked) BOOKMARKED_ALPHA else UNBOOKMARKED_ALPHA,
+        animationSpec = bookmarkAnimationSpec,
         label = "card_alpha"
     )
 
@@ -220,7 +224,10 @@ fun BookmarkVideoGridItem(
             ) {
                 Icon(
                     imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Remove bookmark",
+                    contentDescription = if (isBookmarked)
+                        "Remove bookmark"
+                    else
+                        "Bookmark removed, will disappear on next visit",
                     tint = bookmarkColor,
                     modifier = Modifier
                         .size(24.dp)
@@ -264,10 +271,7 @@ fun BookmarkPhotoGridItem(
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isBookmarked) 1.2f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        animationSpec = bookmarkAnimationSpec,
         label = "bookmark_scale"
     )
 
@@ -278,11 +282,8 @@ fun BookmarkPhotoGridItem(
 
     // 북마크 해제 시 투명도 효과 (아이템이 곧 사라질 것임을 시각적으로 표시)
     val cardAlpha by animateFloatAsState(
-        targetValue = if (isBookmarked) 1f else 0.5f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
+        targetValue = if (isBookmarked) BOOKMARKED_ALPHA else UNBOOKMARKED_ALPHA,
+        animationSpec = bookmarkAnimationSpec,
         label = "card_alpha"
     )
 
@@ -345,7 +346,10 @@ fun BookmarkPhotoGridItem(
             ) {
                 Icon(
                     imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = "Remove bookmark",
+                    contentDescription = if (isBookmarked)
+                        "Remove bookmark"
+                    else
+                        "Bookmark removed, will disappear on next visit",
                     tint = bookmarkColor,
                     modifier = Modifier
                         .size(24.dp)
