@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -133,10 +134,21 @@ fun BookmarkVideoGridItem(
         label = "bookmark_color"
     )
 
+    // 북마크 해제 시 투명도 효과 (아이템이 곧 사라질 것임을 시각적으로 표시)
+    val cardAlpha by animateFloatAsState(
+        targetValue = if (isBookmarked) 1f else 0.5f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "card_alpha"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(0.75f)
+            .graphicsLayer { alpha = cardAlpha }
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
@@ -264,10 +276,21 @@ fun BookmarkPhotoGridItem(
         label = "bookmark_color"
     )
 
+    // 북마크 해제 시 투명도 효과 (아이템이 곧 사라질 것임을 시각적으로 표시)
+    val cardAlpha by animateFloatAsState(
+        targetValue = if (isBookmarked) 1f else 0.5f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "card_alpha"
+    )
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(0.75f)
+            .graphicsLayer { alpha = cardAlpha }
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
