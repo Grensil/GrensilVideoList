@@ -35,6 +35,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,6 +67,9 @@ fun VideoDetailScreen(
     val playbackState by viewModel.playbackState.collectAsState()
     val isBookmarked by viewModel.isBookmarked.collectAsState()
     val isFullscreen by viewModel.isFullscreen.collectAsState()
+
+    // 화면 나갈 때 플레이어 숨김 (잔상 방지)
+    var isExiting by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val activity = context as? Activity
@@ -113,6 +119,7 @@ fun VideoDetailScreen(
         if (isFullscreen) {
             viewModel.exitFullscreen()
         } else {
+            isExiting = true  // 플레이어 숨김 (잔상 방지)
             onBackClick()
         }
     }
@@ -123,6 +130,7 @@ fun VideoDetailScreen(
             exoPlayer = viewModel.playerManager.getPlayer(),
             playbackState = playbackState,
             isFullscreen = true,
+            isExiting = isExiting,
             onPlayPauseClick = viewModel::togglePlayPause,
             onSeek = viewModel::seekTo,
             onFullscreenClick = viewModel::toggleFullscreen,
@@ -135,7 +143,10 @@ fun VideoDetailScreen(
                 TopAppBar(
                     title = { },
                     navigationIcon = {
-                        IconButton(onClick = onBackClick) {
+                        IconButton(onClick = {
+                            isExiting = true  // 플레이어 숨김 (잔상 방지)
+                            onBackClick()
+                        }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
@@ -170,6 +181,7 @@ fun VideoDetailScreen(
                     exoPlayer = viewModel.playerManager.getPlayer(),
                     playbackState = playbackState,
                     isFullscreen = false,
+                    isExiting = isExiting,
                     onPlayPauseClick = viewModel::togglePlayPause,
                     onSeek = viewModel::seekTo,
                     onFullscreenClick = viewModel::toggleFullscreen
