@@ -23,7 +23,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.domain.model.MediaItem
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
-import kotlin.math.abs
 
 
 @OptIn(FlowPreview::class)
@@ -43,39 +42,68 @@ fun HomeScreen(
     val listState = rememberLazyListState()
     val exoPlayer = viewModel.videoPlayerManager.getPlayer()
 
-    // 스크롤 멈춤 감지 및 가장 중앙에 가까운 비디오 찾기
+    // 완전히 보이는 첫 번째 비디오 찾기 함수
+    fun findFirstFullyVisibleVideo(): com.example.domain.model.Video? {
+        val layoutInfo = listState.layoutInfo
+        val visibleItems = layoutInfo.visibleItemsInfo
+        if (visibleItems.isEmpty()) return null
+
+        val viewportStart = layoutInfo.viewportStartOffset
+        val viewportEnd = layoutInfo.viewportEndOffset
+
+        // 완전히 보이는 아이템 중 첫 번째 비디오 찾기
+        for (item in visibleItems) {
+            val itemStart = item.offset
+            val itemEnd = item.offset + item.size
+
+            // 아이템이 완전히 보이는지 확인
+            val isFullyVisible = itemStart >= viewportStart && itemEnd <= viewportEnd
+
+            if (isFullyVisible && item.index < mediaPagingItems.itemCount) {
+                val mediaItem = mediaPagingItems[item.index]
+                if (mediaItem is MediaItem.VideoItem) {
+                    return mediaItem.video
+                }
+            }
+        }
+
+        // 완전히 보이는 비디오가 없으면 가장 많이 보이는 비디오 찾기
+        return visibleItems
+            .filter { item ->
+                val mediaItem = if (item.index < mediaPagingItems.itemCount) {
+                    mediaPagingItems[item.index]
+                } else null
+                mediaItem is MediaItem.VideoItem
+            }
+            .maxByOrNull { item ->
+                val itemStart = item.offset.coerceAtLeast(viewportStart)
+                val itemEnd = (item.offset + item.size).coerceAtMost(viewportEnd)
+                itemEnd - itemStart // 보이는 영역 크기
+            }?.let { item ->
+                val mediaItem = mediaPagingItems[item.index]
+                (mediaItem as? MediaItem.VideoItem)?.video
+            }
+    }
+
+    // 초기 로드 시 첫 번째 비디오 자동 재생
+    LaunchedEffect(mediaPagingItems.itemCount) {
+        if (mediaPagingItems.itemCount > 0 && currentPlayingVideoId == null) {
+            kotlinx.coroutines.delay(500) // 레이아웃 안정화 대기
+            findFirstFullyVisibleVideo()?.let { video ->
+                viewModel.onCenterVideoChanged(video)
+            }
+        }
+    }
+
+    // 스크롤 멈춤 감지 및 완전히 보이는 첫 번째 비디오 찾기
     LaunchedEffect(listState) {
         snapshotFlow { listState.isScrollInProgress }
             .debounce(300) // 스크롤이 멈춘 후 300ms 대기
             .collect { isScrolling ->
                 if (!isScrolling) {
-                    // 스크롤이 멈추면 가장 중앙에 가까운 비디오 찾기
-                    val layoutInfo = listState.layoutInfo
-                    val visibleItems = layoutInfo.visibleItemsInfo
-                    if (visibleItems.isEmpty()) return@collect
-
-                    val viewportCenter = (layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset) / 2
-
-                    // 모든 visible 아이템 중에서 비디오만 필터링하고, 중앙에 가장 가까운 것 찾기
-                    val closestVideoIndex = visibleItems
-                        .filter { item ->
-                            val mediaItem = if (item.index < mediaPagingItems.itemCount) {
-                                mediaPagingItems[item.index]
-                            } else null
-                            mediaItem is MediaItem.VideoItem
-                        }
-                        .minByOrNull { item ->
-                            abs((item.offset + item.size / 2) - viewportCenter)
-                        }?.index
-
-                    if (closestVideoIndex != null && closestVideoIndex < mediaPagingItems.itemCount) {
-                        val mediaItem = mediaPagingItems[closestVideoIndex]
-                        if (mediaItem is MediaItem.VideoItem) {
-                            viewModel.onCenterVideoChanged(mediaItem.video)
-                        }
-                    } else {
-                        viewModel.onCenterVideoChanged(null)
-                    }
+                    findFirstFullyVisibleVideo()?.let { video ->
+                        viewModel.onCenterVideoChanged(video)
+                    } ?: viewModel.onCenterVideoChanged(null)
                 }
             }
     }

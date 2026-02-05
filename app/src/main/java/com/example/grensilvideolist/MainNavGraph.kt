@@ -33,7 +33,7 @@ import com.example.designsystem.theme.PurpleGrey40
 import com.example.designsystem.theme.PurpleGrey80
 import com.example.main.HomeScreen
 import com.example.main.detail.VideoDetailScreen
-import com.example.main.player.VideoPlayerManager
+import com.example.player.VideoPlayerManager
 
 @Composable
 fun MainScreen(videoPlayerManager: VideoPlayerManager? = null) {

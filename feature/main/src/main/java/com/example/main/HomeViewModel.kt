@@ -16,7 +16,7 @@ import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.GetBookmarkedVideosStateUseCase
 import com.example.domain.usecase.video.IsVideoSavedUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
-import com.example.main.player.VideoPlayerManager
+import com.example.player.VideoPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -138,6 +138,8 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onVideoClicked(video: Video) {
+        // 프리뷰 UI 숨기기 (플레이어는 계속 재생 - detail에서 이어서 재생하기 위해)
+        _currentPlayingVideoId.value = null
         // 네비게이션 전에 현재 비디오 저장
         videoPlayerManager.setCurrentVideo(video)
     }

@@ -1,4 +1,4 @@
-package com.example.main.player
+package com.example.player
 
 data class PlaybackState(
     val videoId: Long? = null,

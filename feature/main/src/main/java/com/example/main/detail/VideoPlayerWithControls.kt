@@ -49,7 +49,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import com.example.designsystem.theme.Teal
-import com.example.main.player.PlaybackState
+import com.example.player.PlaybackState
 import kotlinx.coroutines.delay
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -58,6 +58,7 @@ fun VideoPlayerWithControls(
     exoPlayer: ExoPlayer,
     playbackState: PlaybackState,
     isFullscreen: Boolean,
+    isExiting: Boolean = false,  // 화면 나갈 때 플레이어 숨김
     onPlayPauseClick: () -> Unit,
     onSeek: (Long) -> Unit,
     onFullscreenClick: () -> Unit,
@@ -105,11 +106,13 @@ fun VideoPlayerWithControls(
                 indication = null
             ) { showControls = !showControls }
     ) {
-        // 비디오 플레이어
-        AndroidView(
-            factory = { playerView },
-            modifier = Modifier.fillMaxSize()
-        )
+        // 비디오 플레이어 (나갈 때는 숨김 - 잔상 방지)
+        if (!isExiting) {
+            AndroidView(
+                factory = { playerView },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         // 버퍼링 표시
         if (playbackState.playbackState == PlaybackState.STATE_BUFFERING) {

@@ -28,7 +28,6 @@ fun VideoPreviewSurface(
             player = exoPlayer
             useController = false // 컨트롤 숨김
             resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM // 화면 채우기
-            setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
         }
     }
 

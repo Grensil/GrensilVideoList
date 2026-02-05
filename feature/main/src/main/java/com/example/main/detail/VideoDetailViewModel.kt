@@ -7,8 +7,8 @@ import com.example.domain.model.Video
 import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.IsVideoSavedUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
-import com.example.main.player.PlaybackState
-import com.example.main.player.VideoPlayerManager
+import com.example.player.PlaybackState
+import com.example.player.VideoPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

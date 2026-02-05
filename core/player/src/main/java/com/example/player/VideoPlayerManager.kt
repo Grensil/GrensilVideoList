@@ -1,4 +1,4 @@
-package com.example.main.player
+package com.example.player
 
 import android.content.Context
 import androidx.annotation.OptIn
@@ -6,6 +6,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.example.domain.model.Video
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,11 +33,11 @@ class VideoPlayerManager @Inject constructor(
     val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
     // 현재 선택된 비디오 저장 (네비게이션용)
-    private var _currentVideo: com.example.domain.model.Video? = null
-    val currentVideo: com.example.domain.model.Video?
+    private var _currentVideo: Video? = null
+    val currentVideo: Video?
         get() = _currentVideo
 
-    fun setCurrentVideo(video: com.example.domain.model.Video) {
+    fun setCurrentVideo(video: Video) {
         _currentVideo = video
     }
 

@@ -104,6 +104,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:network"))
     implementation(project(":core:designsystem"))
+    implementation(project(":core:player"))
 
     implementation(project(":feature:main"))
     implementation(project(":feature:bookmark"))

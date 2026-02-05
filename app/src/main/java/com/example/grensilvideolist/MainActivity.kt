@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.example.designsystem.theme.GrensilVideoListTheme
 import com.example.grensilvideolist.security.ScreenSecurityHelper
 import com.example.grensilvideolist.security.SecureScreenEffect
-import com.example.main.player.VideoPlayerManager
+import com.example.player.VideoPlayerManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

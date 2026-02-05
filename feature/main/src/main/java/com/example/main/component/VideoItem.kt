@@ -94,22 +94,23 @@ fun VideoItem(
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Video preview or Thumbnail
+            // 썸네일 (항상 배경에 유지 - 고화질 이미지 사용)
+            AsyncImage(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp)),
+                model = video.image,
+                contentScale = ContentScale.Crop,
+                contentDescription = "video thumbnail"
+            )
+
+            // 비디오 프리뷰 (재생 중일 때 위에 오버레이)
             if (isPreviewPlaying && exoPlayer != null) {
                 VideoPreviewSurface(
                     exoPlayer = exoPlayer,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(16.dp))
-                )
-            } else {
-                AsyncImage(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp)),
-                    model = video.videoPictures?.getOrNull(0)?.picture,
-                    contentScale = ContentScale.Crop,
-                    contentDescription = "video thumbnail"
                 )
             }
 
@@ -179,69 +180,57 @@ fun VideoItem(
                 )
             }
 
-            // Bottom info
-            Row(
+            // Bottom section with progress bar and info
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomStart)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .align(Alignment.BottomCenter)
             ) {
-                Text(
-                    text = video.user.name,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-
-                // Duration chip
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Black.copy(alpha = 0.6f))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = formatDuration(video.duration),
-                        color = Color.White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-
-            // Progress bar with remaining time (Bottom) - 프리뷰 재생 중일 때 표시
-            if (isPreviewPlaying) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                ) {
+                // Progress bar - 프리뷰 재생 중일 때 표시
+                if (isPreviewPlaying) {
                     VideoProgressBar(
                         progress = playbackProgress,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
                     )
-                    // 남은 시간 표시
-                    if (remainingSeconds > 0) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 8.dp, bottom = 8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(Color.Black.copy(alpha = 0.7f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = "$remainingSeconds",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                }
+
+                // Bottom info (위쪽에 표시)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = if (isPreviewPlaying) 8.dp else 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = video.user.name,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    // Duration/Remaining time chip (통일된 표시)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = if (isPreviewPlaying && remainingSeconds > 0) {
+                                formatRemainingTime(remainingSeconds)
+                            } else {
+                                formatDuration(video.duration)
+                            },
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -250,6 +239,16 @@ fun VideoItem(
 }
 
 private fun formatDuration(seconds: Int): String {
+    val minutes = seconds / 60
+    val secs = seconds % 60
+    return if (minutes > 0) {
+        "${minutes}:${secs.toString().padStart(2, '0')}"
+    } else {
+        "0:${secs.toString().padStart(2, '0')}"
+    }
+}
+
+private fun formatRemainingTime(seconds: Int): String {
     val minutes = seconds / 60
     val secs = seconds % 60
     return if (minutes > 0) {
