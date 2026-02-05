@@ -56,7 +56,8 @@ fun MediaList(
     listState: LazyListState = rememberLazyListState(),
     onVideoBookmarkClick: (Video) -> Unit,
     onPhotoBookmarkClick: (Photo) -> Unit,
-    onVideoClick: (Video) -> Unit
+    onVideoClick: (Video) -> Unit,
+    onPhotoClick: (Photo) -> Unit
 ) {
     LazyColumn(
         state = listState,
@@ -80,7 +81,8 @@ fun MediaList(
                     is MediaItem.PhotoItem -> PhotoItem(
                         photo = mediaItem.photo,
                         isBookmarked = bookmarkedPhotos[mediaItem.photo.id] == true,
-                        onBookmarkClick = onPhotoBookmarkClick
+                        onBookmarkClick = onPhotoBookmarkClick,
+                        onPhotoClick = onPhotoClick
                     )
                 }
             }

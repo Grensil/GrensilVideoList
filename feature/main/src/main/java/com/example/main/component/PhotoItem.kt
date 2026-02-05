@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -51,7 +52,8 @@ import com.example.domain.model.PhotoSrc
 fun PhotoItem(
     photo: Photo,
     isBookmarked: Boolean = false,
-    onBookmarkClick: (Photo) -> Unit = {}
+    onBookmarkClick: (Photo) -> Unit = {},
+    onPhotoClick: (Photo) -> Unit = {}
 ) {
     val scale by animateFloatAsState(
         targetValue = if (isBookmarked) 1.2f else 1f,
@@ -76,7 +78,8 @@ fun PhotoItem(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(16.dp),
                 ambientColor = Color.Black.copy(alpha = 0.3f)
-            ),
+            )
+            .clickable { onPhotoClick(photo) },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {

@@ -135,7 +135,12 @@ fun MainNavGraph(
             )
         }
         composable(route = Routes.Bookmark.path) {
-            BookmarkScreen(navController = navController)
+            BookmarkScreen(
+                navController = navController,
+                onVideoClick = { videoId ->
+                    navController.navigate(Routes.VideoDetail.createRoute(videoId))
+                }
+            )
         }
         composable(
             route = Routes.VideoDetail.path,

@@ -12,7 +12,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import com.example.domain.model.Photo
+import com.example.main.component.ImagePreviewDialog
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -38,6 +43,9 @@ fun HomeScreen(
     val currentPlayingVideoId by viewModel.currentPlayingVideoId.collectAsState()
     val playbackProgress by viewModel.playbackProgress.collectAsState()
     val remainingSeconds by viewModel.remainingSeconds.collectAsState()
+
+    // 이미지 프리뷰 다이얼로그 상태
+    var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
 
     val listState = rememberLazyListState()
     val exoPlayer = viewModel.videoPlayerManager.getPlayer()
@@ -152,8 +160,19 @@ fun HomeScreen(
                 onVideoClick = { video ->
                     viewModel.onVideoClicked(video)
                     onVideoClick(video.id)
+                },
+                onPhotoClick = { photo ->
+                    selectedPhoto = photo
                 }
             )
+
+            // 이미지 프리뷰 다이얼로그
+            selectedPhoto?.let { photo ->
+                ImagePreviewDialog(
+                    photo = photo,
+                    onDismiss = { selectedPhoto = null }
+                )
+            }
         }
     }
 }

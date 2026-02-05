@@ -17,8 +17,12 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.example.designsystem.component.ImagePreviewDialog
+import com.example.domain.model.Photo
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,12 +32,16 @@ import com.example.bookmark.component.BookmarkMediaGrid
 @Composable
 fun BookmarkScreen(
     navController: NavHostController,
-    viewModel: BookmarkViewModel = hiltViewModel()
+    viewModel: BookmarkViewModel = hiltViewModel(),
+    onVideoClick: (Long) -> Unit = {}
 ) {
     val uiVideos by viewModel.uiVideos.collectAsState()
     val uiPhotos by viewModel.uiPhotos.collectAsState()
     val videoBookmarkStates by viewModel.videoBookmarkStates.collectAsState()
     val photoBookmarkStates by viewModel.photoBookmarkStates.collectAsState()
+
+    // 이미지 프리뷰 다이얼로그 상태
+    var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
 
     // 화면 재진입 시 실제 북마크된 항목만 로드
     DisposableEffect(Unit) {
@@ -94,6 +102,11 @@ fun BookmarkScreen(
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { viewModel.removeVideoBookmark(it) },
                     onPhotoBookmarkRemove = { viewModel.removePhotoBookmark(it) },
+                    onVideoClick = { video ->
+                        viewModel.onVideoClicked(video)
+                        onVideoClick(video.id)
+                    },
+                    onPhotoClick = { photo -> selectedPhoto = photo },
                     lazyGridState = allTabState
                 )
 
@@ -104,6 +117,11 @@ fun BookmarkScreen(
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { video -> viewModel.removeVideoBookmark(video) },
                     onPhotoBookmarkRemove = { },
+                    onVideoClick = { video ->
+                        viewModel.onVideoClicked(video)
+                        onVideoClick(video.id)
+                    },
+                    onPhotoClick = { },
                     lazyGridState = videoTabState
                 )
 
@@ -114,7 +132,18 @@ fun BookmarkScreen(
                     photoBookmarkStates = photoBookmarkStates,
                     onVideoBookmarkRemove = { },
                     onPhotoBookmarkRemove = { photo -> viewModel.removePhotoBookmark(photo) },
+                    onVideoClick = { },
+                    onPhotoClick = { photo -> selectedPhoto = photo },
                     lazyGridState = photoTabState
+                )
+            }
+
+            // 이미지 프리뷰 다이얼로그
+            selectedPhoto?.let { photo ->
+                ImagePreviewDialog(
+                    imageUrl = photo.src.large2x ?: photo.src.large ?: photo.src.original,
+                    contentDescription = photo.alt,
+                    onDismiss = { selectedPhoto = null }
                 )
             }
         }

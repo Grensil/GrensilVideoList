@@ -10,6 +10,7 @@ import com.example.domain.usecase.photo.SavePhotoUseCase
 import com.example.domain.usecase.video.DeleteVideoUseCase
 import com.example.domain.usecase.video.GetSavedVideosUseCase
 import com.example.domain.usecase.video.SaveVideoUseCase
+import com.example.player.VideoPlayerManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,8 @@ class BookmarkViewModel @Inject constructor(
     private val deletePhotoUseCase: DeletePhotoUseCase,
     private val deleteVideoUseCase: DeleteVideoUseCase,
     private val savePhotoUseCase: SavePhotoUseCase,
-    private val saveVideoUseCase: SaveVideoUseCase
+    private val saveVideoUseCase: SaveVideoUseCase,
+    private val videoPlayerManager: VideoPlayerManager
 ) : ViewModel() {
 
     // UI 상태 - 세션 중에는 삭제해도 유지됨
@@ -102,4 +104,9 @@ class BookmarkViewModel @Inject constructor(
     // 하위 호환성을 위해 유지
     fun removeVideoBookmark(video: Video) = toggleVideoBookmark(video)
     fun removePhotoBookmark(photo: Photo) = togglePhotoBookmark(photo)
+
+    // 비디오 클릭 시 네비게이션 전 처리
+    fun onVideoClicked(video: Video) {
+        videoPlayerManager.setCurrentVideo(video)
+    }
 }

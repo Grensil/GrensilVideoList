@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -66,6 +67,8 @@ fun BookmarkMediaGrid(
     photoBookmarkStates: Map<Long, Boolean>,
     onVideoBookmarkRemove: (Video) -> Unit,
     onPhotoBookmarkRemove: (Photo) -> Unit,
+    onVideoClick: (Video) -> Unit = {},
+    onPhotoClick: (Photo) -> Unit = {},
     modifier: Modifier = Modifier,
     lazyGridState: LazyGridState = rememberLazyGridState()
 ) {
@@ -86,7 +89,8 @@ fun BookmarkMediaGrid(
             BookmarkVideoGridItem(
                 video = video,
                 isBookmarked = isBookmarked,
-                onBookmarkRemove = { onVideoBookmarkRemove(video) }
+                onBookmarkRemove = { onVideoBookmarkRemove(video) },
+                onClick = { onVideoClick(video) }
             )
         }
 
@@ -99,7 +103,8 @@ fun BookmarkMediaGrid(
             BookmarkPhotoGridItem(
                 photo = photo,
                 isBookmarked = isBookmarked,
-                onBookmarkRemove = { onPhotoBookmarkRemove(photo) }
+                onBookmarkRemove = { onPhotoBookmarkRemove(photo) },
+                onClick = { onPhotoClick(photo) }
             )
         }
     }
@@ -110,6 +115,7 @@ fun BookmarkVideoGridItem(
     video: Video,
     isBookmarked: Boolean,
     onBookmarkRemove: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -129,7 +135,8 @@ fun BookmarkVideoGridItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f),
+            .aspectRatio(0.75f)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
@@ -248,6 +255,7 @@ fun BookmarkPhotoGridItem(
     photo: Photo,
     isBookmarked: Boolean,
     onBookmarkRemove: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val scale by animateFloatAsState(
@@ -267,7 +275,8 @@ fun BookmarkPhotoGridItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f),
+            .aspectRatio(0.75f)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
