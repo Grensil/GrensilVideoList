@@ -118,9 +118,10 @@ fun VideoPlayerWithControls(
             )
         }
 
-        // 썸네일 (재생 시작 전까지 표시, 재생 시작하면 fade out)
+        // 썸네일 (첫 프레임이 실제 렌더링될 때까지 표시, 그 후 fade out)
         val isActuallyPlaying = playbackState.isPlaying &&
-                playbackState.playbackState == PlaybackState.STATE_READY
+                playbackState.playbackState == PlaybackState.STATE_READY &&
+                playbackState.isFirstFrameRendered
 
         AnimatedVisibility(
             visible = !isActuallyPlaying,
