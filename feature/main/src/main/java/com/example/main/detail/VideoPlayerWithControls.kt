@@ -43,11 +43,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import coil.compose.AsyncImage
 import com.example.designsystem.theme.Teal
 import com.example.designsystem.util.TimeFormatUtils
 import com.example.player.PlaybackState
@@ -59,6 +61,7 @@ fun VideoPlayerWithControls(
     exoPlayer: ExoPlayer,
     playbackState: PlaybackState,
     isFullscreen: Boolean,
+    thumbnailUrl: String,
     isExiting: Boolean = false,  // 화면 나갈 때 플레이어 숨김
     onPlayPauseClick: () -> Unit,
     onSeek: (Long) -> Unit,
@@ -111,6 +114,24 @@ fun VideoPlayerWithControls(
         if (!isExiting) {
             AndroidView(
                 factory = { playerView },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+
+        // 썸네일 (재생 시작 전까지 표시, 재생 시작하면 fade out)
+        val isActuallyPlaying = playbackState.isPlaying &&
+                playbackState.playbackState == PlaybackState.STATE_READY
+
+        AnimatedVisibility(
+            visible = !isActuallyPlaying,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            AsyncImage(
+                model = thumbnailUrl,
+                contentDescription = "Video thumbnail",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         }
