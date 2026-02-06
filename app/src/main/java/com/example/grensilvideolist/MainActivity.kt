@@ -17,6 +17,22 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var videoPlayerManager: VideoPlayerManager
 
+    private var wasPlayingBeforeBackground = false
+
+    override fun onStop() {
+        super.onStop()
+        wasPlayingBeforeBackground = videoPlayerManager.playbackState.value.isPlaying
+        videoPlayerManager.pause()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (wasPlayingBeforeBackground) {
+            videoPlayerManager.play()
+            wasPlayingBeforeBackground = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
