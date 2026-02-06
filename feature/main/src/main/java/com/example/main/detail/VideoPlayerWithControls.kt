@@ -53,6 +53,7 @@ import coil.compose.AsyncImage
 import com.example.designsystem.theme.Teal
 import com.example.designsystem.util.TimeFormatUtils
 import com.example.player.PlaybackState
+import kotlin.math.abs
 import kotlinx.coroutines.delay
 
 @androidx.annotation.OptIn(UnstableApi::class)
@@ -70,6 +71,7 @@ fun VideoPlayerWithControls(
 ) {
     val context = LocalContext.current
     var showControls by remember { mutableStateOf(true) }
+    var isUserDragging by remember { mutableStateOf(false) }
     var isSeeking by remember { mutableStateOf(false) }
     var seekPosition by remember { mutableStateOf(0f) }
 
@@ -86,6 +88,16 @@ fun VideoPlayerWithControls(
         if (showControls && playbackState.isPlaying) {
             delay(3000)
             showControls = false
+        }
+    }
+
+    // Seek 후 플레이어 position이 따라잡으면 isSeeking 해제
+    LaunchedEffect(isUserDragging, playbackState.currentPosition) {
+        if (!isUserDragging && isSeeking) {
+            val seekTargetMs = (seekPosition * playbackState.duration).toLong()
+            if (abs(playbackState.currentPosition - seekTargetMs) < 1000) {
+                isSeeking = false
+            }
         }
     }
 
@@ -207,15 +219,16 @@ fun VideoPlayerWithControls(
                 ) {
                     // 시크바
                     Slider(
-                        value = if (isSeeking) seekPosition else playbackState.progress,
+                        value = if (isUserDragging || isSeeking) seekPosition else playbackState.progress,
                         onValueChange = { value ->
+                            isUserDragging = true
                             isSeeking = true
                             seekPosition = value
                         },
                         onValueChangeFinished = {
+                            isUserDragging = false
                             val newPosition = (seekPosition * playbackState.duration).toLong()
                             onSeek(newPosition)
-                            isSeeking = false
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = SliderDefaults.colors(

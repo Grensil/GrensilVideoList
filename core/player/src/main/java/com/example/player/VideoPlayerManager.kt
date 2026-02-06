@@ -85,6 +85,10 @@ class VideoPlayerManager @Inject constructor(
 
     fun seekTo(positionMs: Long) {
         exoPlayer?.seekTo(positionMs)
+        // Seek 후 즉시 position 반영 (progress tracker 200ms 대기 없이)
+        _playbackState.value = _playbackState.value.copy(
+            currentPosition = positionMs
+        )
     }
 
     fun setMuted(muted: Boolean) {
