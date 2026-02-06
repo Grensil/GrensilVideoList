@@ -55,6 +55,15 @@ class HomeViewModel @Inject constructor(
             initialValue = 0f
         )
 
+    // 비디오가 실제 재생 중인지 (첫 프레임 렌더링 완료 포함)
+    val isVideoActuallyPlaying: StateFlow<Boolean> = videoPlayerManager.playbackState
+        .map { it.isPlaying && it.playbackState == com.example.player.PlaybackState.STATE_READY && it.isFirstFrameRendered }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     // 남은 시간 (초)
     val remainingSeconds: StateFlow<Int> = videoPlayerManager.playbackState
         .map { state ->
@@ -118,6 +127,7 @@ class HomeViewModel @Inject constructor(
             return // 같은 비디오면 스킵
         }
 
+        videoPlayerManager.resetFirstFrame()
         _currentPlayingVideoId.value = video.id
         startPreviewPlayback(video)
     }

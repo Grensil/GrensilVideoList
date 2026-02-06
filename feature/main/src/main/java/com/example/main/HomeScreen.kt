@@ -43,6 +43,7 @@ fun HomeScreen(
     val currentPlayingVideoId by viewModel.currentPlayingVideoId.collectAsState()
     val playbackProgress by viewModel.playbackProgress.collectAsState()
     val remainingSeconds by viewModel.remainingSeconds.collectAsState()
+    val isVideoActuallyPlaying by viewModel.isVideoActuallyPlaying.collectAsState()
 
     // 이미지 프리뷰 다이얼로그 상태
     var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
@@ -151,6 +152,7 @@ fun HomeScreen(
                 bookmarkedVideos = bookmarkedVideos,
                 bookmarkedPhotos = bookmarkedPhotos,
                 currentPlayingVideoId = currentPlayingVideoId,
+                isVideoActuallyPlaying = isVideoActuallyPlaying,
                 playbackProgress = playbackProgress,
                 remainingSeconds = remainingSeconds,
                 exoPlayer = exoPlayer,

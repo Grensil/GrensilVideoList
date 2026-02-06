@@ -1,9 +1,13 @@
 package com.example.main.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +26,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -60,6 +65,7 @@ fun VideoItem(
     video: Video,
     isBookmarked: Boolean = false,
     isPreviewPlaying: Boolean = false,
+    isVideoActuallyPlaying: Boolean = false,
     playbackProgress: Float = 0f,
     remainingSeconds: Int = 0,
     exoPlayer: ExoPlayer? = null,
@@ -95,23 +101,30 @@ fun VideoItem(
         colors = CardDefaults.cardColors(containerColor = DarkCard)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 썸네일 (항상 배경에 유지 - 고화질 이미지 사용)
-            AsyncImage(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(16.dp)),
-                model = video.image,
-                contentScale = ContentScale.Crop,
-                contentDescription = "video thumbnail"
-            )
-
-            // 비디오 프리뷰 (재생 중일 때 위에 오버레이)
+            // 비디오 프리뷰 surface (재생 중일 때 - 뒤에 배치)
             if (isPreviewPlaying && exoPlayer != null) {
                 VideoPreviewSurface(
                     exoPlayer = exoPlayer,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(16.dp))
+                )
+            }
+
+            // 썸네일 (비디오가 실제 렌더링될 때까지 표시, 준비되면 fade out)
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !isVideoActuallyPlaying,
+                enter = fadeIn(),
+                exit = fadeOut(animationSpec = tween(300)),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp)),
+                    model = video.image,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "video thumbnail"
                 )
             }
 
@@ -145,7 +158,7 @@ fun VideoItem(
                 )
             }
 
-            // Play button (Center) - 프리뷰 재생 중이 아닐 때만 표시
+            // Center content: Play button 또는 로딩 인디케이터
             if (!isPreviewPlaying) {
                 Box(
                     modifier = Modifier
@@ -162,6 +175,15 @@ fun VideoItem(
                         modifier = Modifier.size(32.dp)
                     )
                 }
+            } else if (!isVideoActuallyPlaying) {
+                // 로딩 인디케이터 (프리뷰 로딩 중)
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .align(Alignment.Center)
+                )
             }
 
             // Bookmark button (Top Right)

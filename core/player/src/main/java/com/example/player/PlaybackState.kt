@@ -6,7 +6,8 @@ data class PlaybackState(
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     val bufferedPercentage: Int = 0,
-    val playbackState: Int = STATE_IDLE
+    val playbackState: Int = STATE_IDLE,
+    val isFirstFrameRendered: Boolean = false
 ) {
     val progress: Float
         get() = if (duration > 0) currentPosition.toFloat() / duration else 0f
