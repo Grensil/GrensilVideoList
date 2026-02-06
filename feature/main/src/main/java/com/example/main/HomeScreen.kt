@@ -15,8 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import com.example.designsystem.component.ImagePreviewDialog
 import com.example.domain.model.Photo
-import com.example.main.component.ImagePreviewDialog
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -147,7 +147,8 @@ fun HomeScreen(
             // 이미지 프리뷰 다이얼로그
             selectedPhoto?.let { photo ->
                 ImagePreviewDialog(
-                    photo = photo,
+                    imageUrl = photo.src.large2x ?: photo.src.large ?: photo.src.original,
+                    contentDescription = photo.alt,
                     onDismiss = { selectedPhoto = null }
                 )
             }
