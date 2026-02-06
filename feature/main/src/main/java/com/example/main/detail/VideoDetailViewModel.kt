@@ -53,8 +53,6 @@ class VideoDetailViewModel @Inject constructor(
 
     fun setVideo(video: Video) {
         _video.value = video
-        // 새 Surface에 첫 프레임이 렌더링될 때까지 썸네일 유지
-        playerManager.resetFirstFrame()
         // 비디오가 이미 프리뷰에서 재생 중이면 음소거 해제하고 재생
         if (playerManager.playbackState.value.videoId == video.id) {
             playerManager.setMuted(false)
