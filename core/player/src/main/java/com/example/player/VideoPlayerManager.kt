@@ -68,7 +68,10 @@ class VideoPlayerManager @Inject constructor(
         player.playWhenReady = autoPlay
         player.prepare()
 
-        _playbackState.value = _playbackState.value.copy(videoId = videoId)
+        _playbackState.value = _playbackState.value.copy(
+            videoId = videoId,
+            isFirstFrameRendered = false
+        )
         startProgressTracking()
     }
 
@@ -94,6 +97,10 @@ class VideoPlayerManager @Inject constructor(
 
     fun getDuration(): Long {
         return exoPlayer?.duration ?: 0L
+    }
+
+    fun resetFirstFrame() {
+        _playbackState.value = _playbackState.value.copy(isFirstFrameRendered = false)
     }
 
     fun stop() {
@@ -129,6 +136,10 @@ class VideoPlayerManager @Inject constructor(
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _playbackState.value = _playbackState.value.copy(isPlaying = isPlaying)
+            }
+
+            override fun onRenderedFirstFrame() {
+                _playbackState.value = _playbackState.value.copy(isFirstFrameRendered = true)
             }
         })
     }
