@@ -118,8 +118,8 @@
 -keepclassmembers class androidx.security.crypto.** { *; }
 
 # SQLCipher
--keep class net.sqlcipher.** { *; }
--keepclassmembers class net.sqlcipher.** { *; }
+-keep class net.zetetic.database.** { *; }
+-keepclassmembers class net.zetetic.database.** { *; }
 
 # Play Integrity
 -keep class com.google.android.play.core.integrity.** { *; }

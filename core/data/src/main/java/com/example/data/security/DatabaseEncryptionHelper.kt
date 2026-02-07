@@ -5,8 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import androidx.sqlite.db.SupportSQLiteOpenHelper
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.io.File
 import java.security.SecureRandom
 import javax.inject.Inject
@@ -39,7 +38,7 @@ class DatabaseEncryptionHelper @Inject constructor(
      */
     fun getEncryptedFactory(): SupportSQLiteOpenHelper.Factory {
         val passphrase = getOrCreatePassphrase()
-        return SupportFactory(passphrase)
+        return SupportOpenHelperFactory(passphrase)
     }
 
     /**
@@ -104,7 +103,7 @@ class DatabaseEncryptionHelper @Inject constructor(
          * SQLCipher 라이브러리 초기화
          */
         fun initializeSQLCipher(context: Context) {
-            SQLiteDatabase.loadLibs(context)
+            System.loadLibrary("sqlcipher")
         }
     }
 }
