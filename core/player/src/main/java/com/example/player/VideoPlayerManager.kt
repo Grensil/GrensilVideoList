@@ -29,6 +29,10 @@ class VideoPlayerManager @Inject constructor(
     private var progressJob: Job? = null
     private val scope = CoroutineScope(Dispatchers.Main)
 
+    // 디테일 전환 시 위치 보존용
+    private var savedVideoId: Long? = null
+    private var savedPosition: Long = 0L
+
     private val _playbackState = MutableStateFlow(PlaybackState())
     val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
@@ -66,6 +70,45 @@ class VideoPlayerManager @Inject constructor(
         player.setMediaItem(mediaItem)
         player.volume = if (muted) 0f else 1f
         player.playWhenReady = autoPlay
+        player.prepare()
+
+        _playbackState.value = _playbackState.value.copy(
+            videoId = videoId,
+            isFirstFrameRendered = false
+        )
+        startProgressTracking()
+    }
+
+    /**
+     * 디테일 전환 준비: 현재 위치를 저장하고 플레이어를 완전히 정지.
+     * 이전 PlayerView의 비동기 Dispose가 새 Surface를 방해하지 못하도록
+     * stop() + clearVideoSurface()로 깨끗하게 끊음.
+     */
+    fun prepareForTransition() {
+        val player = exoPlayer ?: return
+        savedVideoId = currentVideoId
+        savedPosition = player.currentPosition.coerceAtLeast(0L)
+        progressJob?.cancel()
+        player.stop()
+        player.clearVideoSurface()
+        currentVideoId = null
+        _playbackState.value = PlaybackState()
+    }
+
+    fun prepareForDetail(videoId: Long, url: String) {
+        val player = getPlayer()
+        val startPosition = if (savedVideoId == videoId) {
+            savedPosition
+        } else {
+            0L
+        }
+        savedVideoId = null
+        savedPosition = 0L
+
+        currentVideoId = videoId
+        player.setMediaItem(MediaItem.fromUri(url), startPosition)
+        player.volume = 1f
+        player.playWhenReady = true
         player.prepare()
 
         _playbackState.value = _playbackState.value.copy(

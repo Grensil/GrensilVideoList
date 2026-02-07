@@ -53,20 +53,8 @@ class VideoDetailViewModel @Inject constructor(
 
     fun setVideo(video: Video) {
         _video.value = video
-        // 비디오가 이미 프리뷰에서 재생 중이면 음소거 해제하고 재생
-        if (playerManager.playbackState.value.videoId == video.id) {
-            playerManager.setMuted(false)
-            playerManager.play()  // 확실히 재생 시작
-        } else {
-            // 새로운 비디오면 처음부터 재생
-            val url = video.videoFiles.maxByOrNull { it.width * it.height }?.link ?: return
-            playerManager.prepare(
-                videoId = video.id,
-                url = url,
-                muted = false,
-                autoPlay = true
-            )
-        }
+        val url = video.videoFiles.maxByOrNull { it.width * it.height }?.link ?: return
+        playerManager.prepareForDetail(video.id, url)
     }
 
     fun togglePlayPause() {

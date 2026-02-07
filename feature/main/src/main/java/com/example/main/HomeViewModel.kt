@@ -46,6 +46,9 @@ class HomeViewModel @Inject constructor(
     private val _currentPlayingVideoId = MutableStateFlow<Long?>(null)
     val currentPlayingVideoId: StateFlow<Long?> = _currentPlayingVideoId.asStateFlow()
 
+    // 디테일 전환 시점 (스크롤 debounce와의 경쟁 방지)
+    private var detailNavigationTime = 0L
+
     // 재생 진행률
     val playbackProgress: StateFlow<Float> = videoPlayerManager.playbackState
         .map { it.progress }
@@ -118,6 +121,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onCenterVideoChanged(video: Video?) {
+        // 디테일 전환 직후 스크롤 debounce가 프리뷰를 시작하면
+        // prepareForDetail()을 덮어쓰므로 500ms 동안 무시
+        if (System.currentTimeMillis() - detailNavigationTime < 500L) return
+
         if (video == null) {
             stopPreview()
             return
@@ -148,10 +155,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onVideoClicked(video: Video) {
-        // 프리뷰 UI 숨기기 (플레이어는 계속 재생 - detail에서 이어서 재생하기 위해)
+        detailNavigationTime = System.currentTimeMillis()
         _currentPlayingVideoId.value = null
-        // 네비게이션 전에 현재 비디오 저장
         videoPlayerManager.setCurrentVideo(video)
+        videoPlayerManager.prepareForTransition()
     }
 
     override fun onCleared() {
