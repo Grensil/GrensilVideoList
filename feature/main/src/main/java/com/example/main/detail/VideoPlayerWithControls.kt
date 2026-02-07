@@ -52,6 +52,7 @@ import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.designsystem.theme.Teal
 import com.example.designsystem.util.TimeFormatUtils
+import com.example.main.component.VideoProgressBar
 import com.example.player.PlaybackState
 import kotlin.math.abs
 import kotlinx.coroutines.delay
@@ -132,7 +133,8 @@ fun VideoPlayerWithControls(
 
         // 썸네일 (재생 시작 전까지 표시, 재생 시작하면 fade out)
         val isActuallyPlaying = playbackState.isPlaying &&
-                playbackState.playbackState == PlaybackState.STATE_READY
+                playbackState.playbackState == PlaybackState.STATE_READY &&
+                playbackState.isFirstFrameRendered
 
         AnimatedVisibility(
             visible = !isActuallyPlaying,
@@ -155,6 +157,16 @@ fun VideoPlayerWithControls(
                     .size(48.dp)
                     .align(Alignment.Center),
                 color = Teal
+            )
+        }
+
+        // 항상 표시되는 프로그레스바 (컨트롤 숨겨져도 보임)
+        if (!showControls && isActuallyPlaying) {
+            VideoProgressBar(
+                progress = playbackState.progress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
             )
         }
 
